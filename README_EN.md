@@ -256,7 +256,7 @@
 
   **1. Feedback**
 
-  - To contribute missing papers, contact [deekurforothers@gmail.com](mailto:deekurforothers@gmail.com). Sources must be accurate and reliable; the requirements may be relaxed appropriately when no other source exists
+  - To contribute missing papers, contact [deekur114514@gmail.com](mailto:deekur114514@gmail.com). Sources must be accurate and reliable; the requirements may be relaxed appropriately when no other source exists
   - The same contact applies to supplemental answers. Only test analyses or answers published or issued by the Ministry of Education or **provincial-level** education and examination authorities are accepted; answers for national papers from 2009 onward are not needed
   - **If the material you provide contains your original work or your own compiled work, it will be deemed licensed under CC BY 4.0 when we accept it**
   - For other matters, including corrections, please open an issue
