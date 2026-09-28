@@ -1,0 +1,6 @@
+# Git ignore file
+.DS_Store
+__pycache__/
+*.pyc
+.vercel/
+*.log

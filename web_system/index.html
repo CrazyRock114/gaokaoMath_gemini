@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中国高考数学真题全景题库与数据分析系统 (1952-2026)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX CSS & JS for Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <!-- Chart.js for Multi-Dimensional Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#1d63ed',
+              600: '#154ec1',
+              700: '#103ea2',
+              800: '#0e3483',
+              900: '#0b2762',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo & Branding -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+            <i data-lucide="compass" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-extrabold text-lg tracking-tight text-slate-900">高考数学真题云题库</span>
+              <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full font-bold">1952 - 2026</span>
+              <span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded-full font-medium">75年真题·16,273题</span>
+            </div>
+            <p class="text-xs text-slate-500 hidden sm:block">可读 · 可拆分 · 可改编 · 可组卷的高考数学智能图文工程系统</p>
+          </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <nav class="flex items-center space-x-1 sm:space-x-2">
+          <button id="nav-btn-papers" onclick="switchTab('papers')" class="tab-btn active px-3.5 py-2 text-sm font-semibold rounded-lg flex items-center space-x-1.5 transition-all text-blue-600 bg-blue-50">
+            <i data-lucide="book-marked" class="w-4 h-4"></i>
+            <span>真题套卷</span>
+            <span class="bg-indigo-100 text-indigo-700 text-xs px-1.5 py-0.2 rounded-full font-bold ml-0.5">775套</span>
+          </button>
+          <button id="nav-btn-explorer" onclick="switchTab('explorer')" class="tab-btn px-3.5 py-2 text-sm font-semibold rounded-lg flex items-center space-x-1.5 transition-all text-slate-600 hover:bg-slate-100">
+            <i data-lucide="search" class="w-4 h-4"></i>
+            <span>单题检索</span>
+          </button>
+          <button id="nav-btn-analytics" onclick="switchTab('analytics')" class="tab-btn px-3.5 py-2 text-sm font-semibold rounded-lg flex items-center space-x-1.5 transition-all text-slate-600 hover:bg-slate-100">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            <span>数据大屏</span>
+          </button>
+          <button id="nav-btn-composer" onclick="switchTab('composer')" class="tab-btn px-3.5 py-2 text-sm font-semibold rounded-lg flex items-center space-x-1.5 transition-all text-slate-600 hover:bg-slate-100">
+            <i data-lucide="file-check-2" class="w-4 h-4"></i>
+            <span>智能组卷</span>
+            <span id="basket-badge-top" class="bg-amber-500 text-white text-xs px-1.5 py-0.2 rounded-full font-bold ml-1">0</span>
+          </button>
+          <button id="nav-btn-adaptor" onclick="switchTab('adaptor')" class="tab-btn px-3.5 py-2 text-sm font-semibold rounded-lg flex items-center space-x-1.5 transition-all text-slate-600 hover:bg-slate-100">
+            <i data-lucide="wand-2" class="w-4 h-4"></i>
+            <span>试题改编</span>
+          </button>
+        </nav>
+
+        <!-- Right Quick Action: Basket trigger -->
+        <div class="flex items-center space-x-2">
+          <button onclick="openBasketDrawer()" class="relative flex items-center space-x-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg text-xs font-semibold shadow-xs transition-all">
+            <i data-lucide="shopping-cart" class="w-4 h-4 text-amber-600"></i>
+            <span>试卷篮</span>
+            <span id="basket-count" class="bg-amber-600 text-white px-1.5 py-0.2 rounded-full font-bold">0</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ================================================================ -->
+    <!-- TAB 0: 历年真题套卷库 (Paper Archive) - 快速直达与整卷浏览 -->
+    <!-- ================================================================ -->
+    <section id="tab-papers" class="space-y-6">
+      
+      <!-- Paper Filter Console -->
+      <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 flex items-center space-x-2">
+              <i data-lucide="book-marked" class="w-5 h-5 text-blue-600"></i>
+              <span>历年高考数学全真套卷库 (1952-2026)</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">收录全国统考卷、各省自主命题卷、新高考卷与春考卷共 <strong>775 套</strong> 完整试卷，可整卷浏览、全卷入篮、一键打印与导出。</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs text-slate-500">匹配套卷：</span>
+            <span id="papers-matched-count" class="text-sm font-black text-blue-600">--</span>
+            <span class="text-xs text-slate-500">套</span>
+          </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+          <!-- Year Select -->
+          <div class="space-y-1">
+            <label class="font-semibold text-slate-700">考试年份</label>
+            <select id="paper-filter-year" onchange="filterPapersList()" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-800">
+              <option value="全部">全部年份 (1952-2026)</option>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <!-- Province Select -->
+          <div class="space-y-1">
+            <label class="font-semibold text-slate-700">省份 / 命题主体</label>
+            <select id="paper-filter-province" onchange="filterPapersList()" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium">
+              <option value="全部">全部省份 (全国及各省)</option>
+              <option value="全国">全国卷 (全国I/II/甲/乙/新高考)</option>
+              <option value="北京">北京卷</option>
+              <option value="上海">上海卷</option>
+              <option value="天津">天津卷</option>
+              <option value="江苏">江苏卷</option>
+              <option value="浙江">浙江卷</option>
+              <option value="山东">山东卷</option>
+              <option value="广东">广东卷</option>
+              <option value="湖北">湖北卷</option>
+              <option value="湖南">湖南卷</option>
+              <option value="四川">四川卷</option>
+              <option value="陕西">陕西卷</option>
+              <option value="重庆">重庆卷</option>
+              <option value="福建">福建卷</option>
+              <option value="安徽">安徽卷</option>
+              <option value="江西">江西卷</option>
+              <option value="辽宁">辽宁卷</option>
+              <option value="河南">河南卷</option>
+              <option value="河北">河北卷</option>
+            </select>
+          </div>
+
+          <!-- Track Select -->
+          <div class="space-y-1">
+            <label class="font-semibold text-slate-700">文理 / 模式</label>
+            <select id="paper-filter-track" onchange="filterPapersList()" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800">
+              <option value="全部">全部模式</option>
+              <option value="新高考">新高考 (文理同卷)</option>
+              <option value="理科">理科数学</option>
+              <option value="文科">文科数学</option>
+              <option value="全国统考">历史统考卷</option>
+              <option value="春考">春季高考</option>
+            </select>
+          </div>
+
+          <!-- Keyword Search -->
+          <div class="space-y-1">
+            <label class="font-semibold text-slate-700">试卷关键字</label>
+            <div class="relative">
+              <input type="text" id="paper-filter-keyword" oninput="filterPapersList()" placeholder="如：全国I卷、北京、秋考..." 
+                     class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Decade Quick Buttons -->
+        <div class="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+          <span class="text-slate-400 text-[11px] mr-1">年代快捷定位:</span>
+          <button onclick="setPaperYearQuick(2026)" class="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-semibold text-[11px]">2026真题</button>
+          <button onclick="setPaperDecadeQuick(2020, 2026)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px]">新高考时代 (2020-2026)</button>
+          <button onclick="setPaperDecadeQuick(2010, 2019)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px]">新课标鼎盛 (2010-2019)</button>
+          <button onclick="setPaperDecadeQuick(2000, 2009)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px]">自主命题起步 (2000-2009)</button>
+          <button onclick="setPaperDecadeQuick(1985, 1999)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px]">标准化改革 (1985-1999)</button>
+          <button onclick="setPaperDecadeQuick(1977, 1984)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px]">恢复高考初期 (1977-1984)</button>
+          <button onclick="setPaperDecadeQuick(1952, 1965)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px]">建国探索期 (1952-1965)</button>
+        </div>
+      </div>
+
+      <!-- Papers Grid -->
+      <div id="papers-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- TAB 1: 题库全景检索 (Explorer) -->
+    <!-- ================================================================ -->
+    <section id="tab-explorer" class="hidden space-y-6">
+      
+      <!-- Quick Paper Finder Banner inside Explorer -->
+      <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+            <i data-lucide="zap" class="w-5 h-5 text-amber-300"></i>
+          </div>
+          <div>
+            <div class="font-black text-sm tracking-wide flex items-center space-x-2">
+              <span>快速查找整套真题卷</span>
+              <span class="bg-amber-400 text-slate-900 text-[10px] px-1.5 py-0.2 rounded font-bold">直通</span>
+            </div>
+            <div class="text-xs text-blue-100">想直接看某一年某一省份的完整试卷？在此秒级直达整卷</div>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <select id="quick-jump-year" class="bg-white text-slate-800 text-xs px-2.5 py-1.5 rounded-lg font-semibold border-0 focus:ring-2 focus:ring-amber-400">
+            <!-- 2026 down to 1952 -->
+          </select>
+          <select id="quick-jump-province" class="bg-white text-slate-800 text-xs px-2.5 py-1.5 rounded-lg font-semibold border-0 focus:ring-2 focus:ring-amber-400">
+            <option value="全国">全国卷</option>
+            <option value="北京">北京卷</option>
+            <option value="上海">上海卷</option>
+            <option value="天津">天津卷</option>
+            <option value="江苏">江苏卷</option>
+            <option value="浙江">浙江卷</option>
+            <option value="山东">山东卷</option>
+            <option value="广东">广东卷</option>
+            <option value="湖北">湖北卷</option>
+            <option value="湖南">湖南卷</option>
+            <option value="四川">四川卷</option>
+            <option value="陕西">陕西卷</option>
+            <option value="重庆">重庆卷</option>
+          </select>
+          <button onclick="handleQuickJump()" class="px-4 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-lg text-xs shadow-xs transition-all flex items-center space-x-1">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+            <span>查看该卷完整真题</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Filters Container -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+        
+        <!-- Search Bar Row -->
+        <div class="flex flex-col md:flex-row gap-3">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <i data-lucide="search" class="w-5 h-5"></i>
+            </div>
+            <input type="text" id="filter-keyword" placeholder="搜索题干、公式如 \ln x、考点标签（如：极值点偏移、外接球、二项分布、离心率）..." 
+                   class="w-full pl-10 pr-4 py-2.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button onclick="triggerSearch()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-xs flex items-center space-x-1.5 transition-all">
+              <i data-lucide="filter" class="w-4 h-4"></i>
+              <span>立即检索</span>
+            </button>
+            <button onclick="resetFilters()" class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-medium transition-all" title="重置全部筛选条件">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Grid -->
+        <div class="pt-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          
+          <!-- Filter: Year Range -->
+          <div class="space-y-1.5">
+            <label class="font-semibold text-slate-700 flex justify-between">
+              <span>考试年份区间</span>
+              <span id="year-range-display" class="text-blue-600 font-bold">1952 - 2026</span>
+            </label>
+            <div class="flex items-center space-x-2">
+              <input type="number" id="filter-year-min" min="1952" max="2026" value="1952" class="w-20 px-2 py-1 border border-slate-200 rounded-lg text-center font-mono">
+              <span class="text-slate-400">至</span>
+              <input type="number" id="filter-year-max" min="1952" max="2026" value="2026" class="w-20 px-2 py-1 border border-slate-200 rounded-lg text-center font-mono">
+            </div>
+            <div class="flex flex-wrap gap-1 pt-1">
+              <button onclick="setYearPreset(2026, 2026)" class="px-1.5 py-0.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded text-[11px]">2026真题</button>
+              <button onclick="setYearPreset(2020, 2026)" class="px-1.5 py-0.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded text-[11px]">新高考(20-26)</button>
+              <button onclick="setYearPreset(2000, 2019)" class="px-1.5 py-0.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded text-[11px]">新课标(00-19)</button>
+              <button onclick="setYearPreset(1977, 1984)" class="px-1.5 py-0.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded text-[11px]">恢复期(77-84)</button>
+              <button onclick="setYearPreset(1952, 1965)" class="px-1.5 py-0.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded text-[11px]">建国期(52-65)</button>
+            </div>
+          </div>
+
+          <!-- Filter: Province / Region -->
+          <div class="space-y-1.5">
+            <label class="font-semibold text-slate-700">省份 / 卷别</label>
+            <select id="filter-province" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <option value="全部">全部省份/卷别</option>
+              <option value="全国">全国卷 (全国I/II/甲/乙/新课标)</option>
+              <option value="北京">北京卷</option>
+              <option value="上海">上海卷</option>
+              <option value="天津">天津卷</option>
+              <option value="江苏">江苏卷</option>
+              <option value="浙江">浙江卷</option>
+              <option value="山东">山东卷</option>
+              <option value="广东">广东卷</option>
+              <option value="湖北">湖北卷</option>
+              <option value="湖南">湖南卷</option>
+              <option value="四川">四川卷</option>
+              <option value="陕西">陕西卷</option>
+              <option value="福建">福建卷</option>
+              <option value="安徽">安徽卷</option>
+              <option value="江西">江西卷</option>
+              <option value="重庆">重庆卷</option>
+              <option value="辽宁">辽宁卷</option>
+            </select>
+            <div class="flex items-center space-x-2 pt-1">
+              <label class="font-semibold text-slate-700">模式:</label>
+              <select id="filter-track" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg">
+                <option value="全部">全部文理模式</option>
+                <option value="新高考">新高考 (不分文理)</option>
+                <option value="理科">理科数学</option>
+                <option value="文科">文科数学</option>
+                <option value="全国统考">历史统考卷</option>
+                <option value="春考">春季高考</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Filter: Section & Difficulty -->
+          <div class="space-y-1.5">
+            <label class="font-semibold text-slate-700">试题题型</label>
+            <select id="filter-section" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
+              <option value="全部">全部题型</option>
+              <option value="单选">单项选择题</option>
+              <option value="多选">多项选择题 (新高考特有)</option>
+              <option value="填空">填空题</option>
+              <option value="解答">解答题 / 大题</option>
+              <option value="附加">附加题 / 选考题</option>
+            </select>
+            <div class="flex items-center space-x-2 pt-1">
+              <label class="font-semibold text-slate-700">难度:</label>
+              <select id="filter-difficulty" class="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg">
+                <option value="全部">全部难度</option>
+                <option value="基础">基础题 (易)</option>
+                <option value="中档">中档题 (中)</option>
+                <option value="压轴">压轴题 (难)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Filter: Category & Switches -->
+          <div class="space-y-1.5">
+            <label class="font-semibold text-slate-700">十大数学知识域</label>
+            <select id="filter-category" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg font-medium text-slate-800">
+              <option value="全部">全部知识域 (All Topics)</option>
+              <option value="函数与导数">函数与导数 (微积分/极值/切线)</option>
+              <option value="平面解析几何">平面解析几何 (圆锥曲线/定点定值)</option>
+              <option value="立体几何与空间向量">立体几何与空间向量 (二面角/外接球)</option>
+              <option value="三角函数与解三角形">三角函数与解三角形 (正余弦定理)</option>
+              <option value="数列">数列 (等差等比/求和/放缩)</option>
+              <option value="概率与统计">概率与统计 (分布列/期望/回归)</option>
+              <option value="平面向量与复数">平面向量与复数 (数量积/复平面)</option>
+              <option value="集合与常用逻辑用语">集合与常用逻辑用语 (充要条件)</option>
+              <option value="不等式">不等式 (均值/柯西/线性规划)</option>
+              <option value="初等代数与传统几何">初等代数与传统几何 (50年代多项式)</option>
+            </select>
+            <div class="flex items-center space-x-3 pt-2">
+              <label class="flex items-center space-x-1 cursor-pointer">
+                <input type="checkbox" id="filter-has-image" class="rounded text-blue-600 focus:ring-blue-500">
+                <span class="text-slate-600">仅看有配图</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Result Status Bar -->
+      <div class="flex items-center justify-between text-xs text-slate-500 px-1">
+        <div>
+          <span>找到符合条件的真题：</span>
+          <span id="result-total-count" class="font-bold text-slate-900 text-sm">--</span>
+          <span> 道</span>
+          <span id="loading-spinner" class="ml-2 text-blue-600 font-medium hidden">
+            <i data-lucide="loader-2" class="w-3.5 h-3.5 inline animate-spin"></i> 加载中...
+          </span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span>排序方式: 年份降序 (新考题优先)</span>
+        </div>
+      </div>
+
+      <!-- Question Cards List Container -->
+      <div id="questions-container" class="space-y-4">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+
+      <!-- Pagination -->
+      <div id="pagination-container" class="flex items-center justify-center space-x-2 py-6">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- TAB 2: 历年大数据分析大屏 (Analytics) -->
+    <!-- ================================================================ -->
+    <section id="tab-analytics" class="hidden space-y-6">
+      
+      <!-- Top KPIs Banner -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+          <div class="text-xs text-slate-500 font-medium">历史跨度</div>
+          <div class="text-2xl font-black text-blue-600 mt-1">75 <span class="text-xs text-slate-400 font-normal">年</span></div>
+          <div class="text-[11px] text-slate-400 mt-0.5">1952年 ～ 2026年</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+          <div class="text-xs text-slate-500 font-medium">真题总题量</div>
+          <div class="text-2xl font-black text-slate-900 mt-1">16,273 <span class="text-xs text-slate-400 font-normal">道</span></div>
+          <div class="text-[11px] text-emerald-600 mt-0.5">全国最全历史收录</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+          <div class="text-xs text-slate-500 font-medium">完整高考试卷</div>
+          <div class="text-2xl font-black text-slate-900 mt-1">775 <span class="text-xs text-slate-400 font-normal">套</span></div>
+          <div class="text-[11px] text-slate-400 mt-0.5">含统考、自主卷、春考</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+          <div class="text-xs text-slate-500 font-medium">权威步骤解答</div>
+          <div class="text-2xl font-black text-emerald-600 mt-1">96.7%</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">15,744 题含详析</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+          <div class="text-xs text-slate-500 font-medium">题图与重绘图</div>
+          <div class="text-2xl font-black text-amber-600 mt-1">3,523 <span class="text-xs text-slate-400 font-normal">幅</span></div>
+          <div class="text-[11px] text-slate-400 mt-0.5">图文题库完美呈现</div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1: Historical Timeline & Knowledge Breakdown -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Chart: 75 Years Trend -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 flex items-center space-x-2">
+              <i data-lucide="line-chart" class="w-5 h-5 text-blue-600"></i>
+              <span>1952-2026年 高考数学题量历史走势</span>
+            </h3>
+            <span class="text-xs text-slate-400 font-mono">从6题大题制到分省命题繁荣</span>
+          </div>
+          <div class="h-72">
+            <canvas id="chart-year-trend"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart: Knowledge Taxonomy Share -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 flex items-center space-x-2">
+              <i data-lucide="pie-chart" class="w-5 h-5 text-indigo-600"></i>
+              <span>十大核心知识域 75 年总题量占比</span>
+            </h3>
+            <span class="text-xs text-slate-400 font-mono">三角/解几/导数鼎立</span>
+          </div>
+          <div class="h-72">
+            <canvas id="chart-category-pie"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Charts Row 2: Regional Differences & Question Types -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Chart: Question Types Evolution -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 flex items-center space-x-2 text-sm">
+              <i data-lucide="layers" class="w-4 h-4 text-emerald-600"></i>
+              <span>题型结构历史占比</span>
+            </h3>
+          </div>
+          <div class="h-64">
+            <canvas id="chart-section-types"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart: Regional Styles Radar -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3 lg:col-span-2">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 flex items-center space-x-2 text-sm">
+              <i data-lucide="radar" class="w-4 h-4 text-amber-600"></i>
+              <span>主要命题主体风格画像对比（全国卷 vs 江苏 vs 上海 vs 北京 vs 浙江）</span>
+            </h3>
+          </div>
+          <div class="h-64">
+            <canvas id="chart-regional-radar"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Historical Eras Monograph Cards -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+        <h3 class="text-base font-extrabold text-slate-900 flex items-center space-x-2">
+          <i data-lucide="history" class="w-5 h-5 text-blue-600"></i>
+          <span>高考数学 75 年五大历史时期命题哲学综述</span>
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs" id="eras-cards-container">
+          <!-- Populated from analysis json in app.js -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- TAB 3: 智能组卷中心 (Composer) -->
+    <!-- ================================================================ -->
+    <section id="tab-composer" class="hidden space-y-6">
+      
+      <!-- Composer Top Bar -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-extrabold text-slate-900 flex items-center space-x-2">
+            <i data-lucide="book-open-check" class="w-5 h-5 text-blue-600"></i>
+            <span>智能组卷与试卷排版工作台</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">支持自由选题组卷、预设标准卷一键生成、学生模考打印版与教师详解版双模式导出。</p>
+        </div>
+
+        <!-- Quick Smart Presets -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="smartCompose('new_gaokao_standard')" class="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center space-x-1.5 transition-all">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>一键生成新高考19题标准卷 (150分)</span>
+          </button>
+          <button onclick="smartCompose('high_order_focus')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg text-xs font-medium transition-all">
+            <span>压轴大题专题突破卷</span>
+          </button>
+          <button onclick="smartCompose('full_paper')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-all">
+            <span>载入2026全国I卷真题</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Paper Statistics & Mode Switch Bar -->
+      <div class="bg-slate-100/80 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center space-x-4">
+          <span class="font-semibold text-slate-700">当前卷面：</span>
+          <span>总题数：<strong id="paper-q-count" class="text-blue-600 font-bold text-sm">0</strong> 题</span>
+          <span>预估总分：<strong id="paper-total-score" class="text-emerald-600 font-bold text-sm">0</strong> 分</span>
+          <span id="paper-diff-ratio" class="text-slate-500">难度配比：-</span>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <span class="text-slate-500 font-medium">预览模式:</span>
+          <div class="bg-white border border-slate-200 p-0.5 rounded-lg flex items-center space-x-1">
+            <button id="view-mode-student" onclick="setPaperViewMode('student')" class="px-2.5 py-1 rounded text-xs font-semibold bg-blue-600 text-white transition-all">学生模考版 (无答案)</button>
+            <button id="view-mode-teacher" onclick="setPaperViewMode('teacher')" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">教师解析版 (含全解)</button>
+          </div>
+
+          <button onclick="printPaper()" class="px-3 py-1 bg-slate-800 hover:bg-black text-white rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-xs transition-all">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>打印 / 存为PDF</span>
+          </button>
+          <button onclick="exportPaperLatex()" class="px-2.5 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-xs font-medium">
+            <span>导出 LaTeX</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Composed Exam Paper Preview Container (Designed for Print & Screen) -->
+      <div id="composed-paper-view" class="bg-white rounded-2xl border border-slate-200 p-8 shadow-xs min-h-[500px] space-y-6 printable-paper">
+        
+        <!-- Paper Header -->
+        <div class="text-center pb-6 border-b-2 border-slate-900 space-y-2">
+          <div class="text-xs tracking-widest text-slate-500 font-semibold uppercase">普通高等学校招生全国统一考试模拟试卷</div>
+          <h1 id="paper-title-display" class="text-2xl font-black text-slate-900 tracking-tight">2026年普通高等学校招生全国统一考试数学试卷</h1>
+          <div class="text-xs text-slate-600 flex items-center justify-center space-x-6 pt-1 font-serif">
+            <span>考试时间：120 分钟</span>
+            <span>试卷满分：150 分</span>
+            <span>命题模式：新高考国家标准卷</span>
+          </div>
+          <!-- Student exam info box -->
+          <div class="student-info-grid max-w-md mx-auto pt-3 grid grid-cols-3 gap-2 text-xs border border-dashed border-slate-300 p-2 rounded">
+            <span>姓名：<span class="border-b border-slate-400 inline-block w-20"></span></span>
+            <span>准考证号：<span class="border-b border-slate-400 inline-block w-20"></span></span>
+            <span>考场座位：<span class="border-b border-slate-400 inline-block w-12"></span></span>
+          </div>
+        </div>
+
+        <!-- Paper Body Questions -->
+        <div id="composed-questions-list" class="space-y-6">
+          <div class="text-center py-12 text-slate-400">
+            <i data-lucide="file-plus" class="w-10 h-10 mx-auto stroke-1 mb-2"></i>
+            <p>试卷篮为空，请点击上方“一键生成新高考19题标准卷”或在“题库检索”中添加试题！</p>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- TAB 4: 试题改编工坊 (Adaptor) -->
+    <!-- ================================================================ -->
+    <section id="tab-adaptor" class="hidden space-y-6">
+      
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-900 flex items-center space-x-2">
+              <i data-lucide="wand-2" class="w-5 h-5 text-indigo-600"></i>
+              <span>高考真题变式与改编工坊 (Problem Adaptor)</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">深度剖析原题数学内核，提供参数化变式、逆向提问、几何迁移与跨情境改编方案。</p>
+          </div>
+          <button onclick="loadSampleAdaptation()" class="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-semibold">
+            载入典型导数极值点偏移压轴题改编示例
+          </button>
+        </div>
+
+        <!-- Adaptor Workspace Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+          
+          <!-- Left: Original Question Card -->
+          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50 space-y-3">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-700">【母题原题】</span>
+              <span id="adaptor-orig-uid" class="font-mono text-blue-600">GK-2026-national_paper_1-19</span>
+            </div>
+            <div id="adaptor-orig-body" class="text-sm bg-white p-3 rounded-lg border border-slate-200/80 min-h-[120px]">
+              <!-- Filled dynamically -->
+            </div>
+            <div id="adaptor-orig-tags" class="flex flex-wrap gap-1 text-[11px]">
+              <!-- Tags -->
+            </div>
+          </div>
+
+          <!-- Right: Adaptation Guidelines & Derivative Problem -->
+          <div class="border border-indigo-100 bg-indigo-50/30 rounded-xl p-4 space-y-4">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-indigo-900 flex items-center space-x-1">
+                <i data-lucide="lightbulb" class="w-4 h-4 text-indigo-600"></i>
+                <span>【改编维度与变式策略】</span>
+              </span>
+              <span class="text-indigo-600 font-medium">智能启发推荐</span>
+            </div>
+
+            <!-- Strategy Checklist -->
+            <div id="adaptor-strategies-list" class="space-y-2 text-xs text-slate-700">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- Parameters Table -->
+            <div class="space-y-1.5 text-xs">
+              <span class="font-semibold text-slate-800">可调整代数参数：</span>
+              <div id="adaptor-params-list" class="flex flex-wrap gap-1.5">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Generated Variation Card -->
+            <div class="border border-emerald-200 bg-white rounded-lg p-3 text-xs space-y-2 shadow-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-emerald-800 flex items-center space-x-1">
+                  <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  <span>【变式生成试题预览】</span>
+                </span>
+                <span class="bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded font-mono text-[10px]">新高考改编版</span>
+              </div>
+              <div id="adaptor-variation-body" class="text-slate-800 text-sm font-serif">
+                <!-- Dynamically populated -->
+              </div>
+              <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-100 flex items-center justify-between">
+                <span>命题意图：保持对称差构造核心思想，提升隐零点判定思维深度。</span>
+                <button onclick="addVariationToBasket()" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold">加入组卷</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Floating Exam Basket Drawer Modal -->
+  <div id="basket-drawer" class="fixed inset-0 z-50 overflow-hidden hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity" onclick="closeBasketDrawer()"></div>
+    
+    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div class="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+        
+        <!-- Drawer Header -->
+        <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="shopping-cart" class="w-5 h-5 text-amber-600"></i>
+            <h3 class="font-bold text-slate-900">我的试卷篮 (<span id="drawer-basket-count">0</span>)</h3>
+          </div>
+          <button onclick="closeBasketDrawer()" class="text-slate-400 hover:text-slate-600 p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Drawer Content List -->
+        <div id="basket-items-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Drawer Footer -->
+        <div class="p-4 border-t border-slate-200 bg-slate-50 space-y-2">
+          <div class="flex items-center justify-between text-xs text-slate-600">
+            <span>试题总数：<strong id="drawer-total-count" class="text-slate-900">0</strong> 道</span>
+            <span>预估满分：<strong id="drawer-total-score" class="text-blue-600 font-bold">0</strong> 分</span>
+          </div>
+          <div class="flex space-x-2">
+            <button onclick="clearBasket()" class="flex-1 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold">清空试卷篮</button>
+            <button onclick="proceedToComposeFromBasket()" class="flex-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-xs">生成并编辑试卷</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Exam Paper Reader Modal (整卷全屏沉浸式阅读与打印) -->
+  <div id="full-paper-modal" class="fixed inset-0 z-50 overflow-y-auto hidden bg-slate-900/60 backdrop-blur-xs">
+    <div class="min-h-screen px-2 sm:px-6 py-6 flex items-center justify-center">
+      <div class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-200">
+        
+        <!-- Sticky Modal Header -->
+        <div class="bg-slate-900 text-white px-6 py-4 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-20 shadow-md">
+          <div class="flex items-center space-x-3">
+            <span class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-sm">卷</span>
+            <div>
+              <h2 id="reader-paper-title" class="text-base sm:text-lg font-black tracking-tight text-white">2026年全国I卷</h2>
+              <div id="reader-paper-meta" class="text-xs text-slate-300 flex items-center space-x-2 pt-0.5">
+                <!-- Badges -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Header Controls -->
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <button id="reader-btn-toggle-mode" onclick="toggleReaderMode()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 rounded-lg font-semibold transition-all">
+              <i data-lucide="eye" class="w-3.5 h-3.5 inline mr-1"></i>
+              <span id="reader-mode-label">切换学生模考版 (无答案)</span>
+            </button>
+
+            <button onclick="addCurrentReaderPaperToBasket()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold shadow-xs transition-all">
+              <i data-lucide="shopping-cart" class="w-3.5 h-3.5 inline mr-1"></i>
+              <span>全卷入篮</span>
+            </button>
+
+            <button onclick="printReaderPaper()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold shadow-xs transition-all">
+              <i data-lucide="printer" class="w-3.5 h-3.5 inline mr-1"></i>
+              <span>打印/存PDF</span>
+            </button>
+
+            <button onclick="exportReaderPaperLatex()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg">
+              LaTeX
+            </button>
+
+            <button onclick="exportReaderPaperMarkdown()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg">
+              MD
+            </button>
+
+            <button onclick="closeFullPaperModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-all ml-1">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Scrollable Paper Body -->
+        <div id="reader-paper-content" class="p-8 sm:p-12 overflow-y-auto max-h-[85vh] bg-white space-y-8 font-serif printable-paper">
+          <!-- Populated dynamically by app.js -->
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Single Question Detail Modal -->
+  <div id="question-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="min-h-screen px-4 text-center flex items-center justify-center">
+      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity" onclick="closeQuestionModal()"></div>
+      <div class="inline-block w-full max-w-3xl my-8 p-6 text-left bg-white rounded-2xl shadow-xl transform transition-all relative z-10 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center space-x-2">
+            <span id="modal-uid" class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded"></span>
+            <span id="modal-paper-name" class="text-xs font-semibold text-slate-700"></span>
+          </div>
+          <button onclick="closeQuestionModal()" class="text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        
+        <div id="modal-body" class="text-sm text-slate-800 leading-relaxed font-serif"></div>
+        <div id="modal-options" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs"></div>
+        
+        <div class="border-t border-slate-100 pt-3 space-y-3">
+          <div class="bg-amber-50/60 border border-amber-200/80 rounded-xl p-3">
+            <div class="text-xs font-bold text-amber-900 flex items-center space-x-1">
+              <i data-lucide="check-circle" class="w-4 h-4 text-amber-600"></i>
+              <span>参考答案：<span id="modal-answer" class="font-mono text-amber-700 ml-1"></span></span>
+            </div>
+          </div>
+          <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4">
+            <div class="text-xs font-bold text-slate-700 mb-2">详细解答与推导过程：</div>
+            <div id="modal-solution" class="text-xs text-slate-700 leading-relaxed font-serif space-y-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 space-y-1">
+      <p class="font-semibold text-slate-700">高考数学真题图文云题库与数据分析系统 (1952-2026)</p>
+      <p>开源数据源致谢：<a href="https://github.com/deekur/gaokaomath" target="_blank" class="text-blue-600 hover:underline">deekur/gaokaomath</a> 与 <a href="https://github.com/DxAThing/Gaokao-Math-Problems-Compilation" target="_blank" class="text-blue-600 hover:underline">DxAThing/Gaokao-Math-Problems-Compilation</a> · 遵循 CC BY-SA 4.0 许可</p>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

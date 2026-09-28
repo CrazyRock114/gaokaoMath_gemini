@@ -1,0 +1,19 @@
+# Vercel Deployment Ignore Configuration
+# Offloads heavy source PDFs, raw TeX files, and raw images to keep deployment under 40MB
+
+普通高考/
+春季高考/
+latex_source/content/
+latex_source/index/
+latex_source/tools/
+latex_source/img/
+latex_source/img_repaint/
+scripts/
+data/
+generated_paper_demo.md
+.git/
+.github/
+.DS_Store
+__pycache__/
+*.pyc
+*.pack

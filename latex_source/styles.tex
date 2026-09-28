@@ -1,0 +1,2043 @@
+% ==============================================================================
+% 1. 基础设置与字体
+% ==============================================================================
+\usepackage{xeCJK}
+\xeCJKsetup{
+    PunctStyle=kaiming,                  % 开明式：句末标点始终压缩为半角，腾出更多空间
+    CheckSingle=true                     % 避免段末单字独占一行
+}
+\tolerance=1000                          % 提高断行容忍度，允许稍松的行以避免标点溢出到下一行
+\emergencystretch=3em                    % 加大紧急伸缩量
+\setCJKmainfont{SimSun}[
+    BoldFont = SimHei,
+    ItalicFont = KaiTi
+]
+\setmainfont{Times New Roman}
+
+% 全局段落设置：无缩进，无段间距，正文行距
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\renewcommand{\baselinestretch}{1.5}
+
+% Keep a finite amount of stretch on prose paragraph final lines.  The
+% default infinite \parfillskip makes a one-character final line cost-free,
+% so TeX may strand a single Han character or punctuation mark.  A small
+% finite reserve (half the local line width) makes that break expensive while
+% preserving ordinary justification.  Structured layouts (TOC, choices, figures and tables)
+% restore their own paragraph settings or never enter this hook.
+\newcommand{\examproseparagraph}{%
+    \parfillskip=0pt plus 0.5\linewidth
+}
+
+% 单字不成行、单行不成页
+\makeatletter
+\newif\ifexamcolorstackinitialized
+\ifdefined\main@pdfcolorstack
+    \examcolorstackinitializedtrue
+\else
+    \examcolorstackinitializedfalse
+\fi
+\newcommand{\examwidoworphanrules}{%
+    \clubpenalty=10000%
+    \widowpenalty=10000%
+    \displaywidowpenalty=10000%
+    \brokenpenalty=10000%
+    \@clubpenalty=10000%
+}
+\makeatother
+\examwidoworphanrules
+\AtBeginDocument{\examwidoworphanrules}
+\raggedbottom
+
+% ==============================================================================
+% 2. 章节标题样式 (试卷结构)
+% ==============================================================================
+\ctexset {
+    chapter = {
+        pagestyle = headings,
+        break = \clearpage,      % 关键：每一章(每一份试卷)强制换页
+        numbering = false,       % 关键：不显示“第一章”字样，仅显示标题
+        format = \bfseries\zihao{3}\centering,  % 三号字
+        beforeskip = 0em,
+        afterskip = 0em,
+    },
+    section = {
+        format = \bfseries\zihao{-4}, % 小四号字并加粗
+        number = \chinese{section}、,  % 格式：一、
+        indent = 0pt,
+        aftername = \hspace{0pt},
+        beforeskip = 0.5em,
+        afterskip = 0.5em,
+    },
+}
+
+\usepackage{etoolbox}
+% tall-page 布尔开关：\tallpagetrue（默认）/ \tallpagefalse
+\newif\iftallpage
+\tallpagetrue
+\makeatletter
+% Reset the TeX/xcolor current-color bookkeeping without pushing a new
+% graphics color-stack entry.  Chapter hooks run at top level, so the usual
+% \normalcolor (which calls \set@color and schedules an aftergroup pop) would
+% leak one stack entry per chapter.
+\newcommand{\examresetnormalcolor}{%
+    \let\current@color\default@color
+    \ifdefined\XC@default@color
+        \let\XC@current@color\XC@default@color
+    \fi
+    \ifexamcolorstackinitialized\else
+        \special{pdfcolorstackinit 1 page direct (0 g 0 G)}%
+        \global\examcolorstackinitializedtrue
+    \fi
+    \ifdefined\@pdfcolorstack
+        \special{pdfcolorstack \@pdfcolorstack set (0 g 0 G)}%
+    \else
+        \special{pdfcolorstack 1 set (0 g 0 G)}%
+        % Legacy xdv color handlers still understand the direct `color`
+        % special; discard one leaked non-default color first, then change
+        % the graphics state in place without another stack push.
+        \ifx\current@color\default@color\else
+            \special{color pop}%
+        \fi
+        \special{color gray 0}%
+    \fi
+}
+\makeatother
+\pretocmd{\chapter}{%
+    \FloatBarrier
+    \examresetnormalcolor
+    \problembodyend
+    \setcounter{probnum}{0}%
+    \setcounter{section}{0}%
+    \iftallpage
+        \pdfpageheight=550cm\relax
+        \setlength{\textheight}{546cm}%
+        \vsize=\textheight\relax
+    \fi
+}{}{}
+\pretocmd{\section}{\problembodyend}{}{}
+\makeatletter
+\patchcmd{\tableofcontents}
+  {\@starttoc{toc}}
+  {%
+    \iftallpage
+      \@starttoc{toc}%
+    \else
+      \begingroup
+        \normalfont
+        \zihao{-4}\selectfont
+        \setlength{\columnsep}{1.8em}%
+        \setlength{\columnseprule}{0.8pt}%
+        \begin{multicols}{2}\@starttoc{toc}\end{multicols}%
+      \endgroup
+    \fi
+  }
+  {}{}
+\renewcommand*\l@part[2]{%
+  \addpenalty{-\@highpenalty}%
+  \vskip 0.8em \@plus\p@
+  \begingroup
+    \parindent \z@
+    \rightskip \z@
+    \parfillskip \z@
+    \centering\normalfont #1\par
+  \endgroup
+}
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{\@secpenalty}%
+    \addvspace{0pt}%
+    \begingroup
+      \parindent \z@
+      \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode
+      #1\nobreak\leaders\hbox{$\m@th \mkern 2mu.\mkern 2mu$}\hfill\nobreak
+      \hb@xt@\@pnumwidth{\hss #2}\par
+    \endgroup
+  \fi
+}
+\makeatother
+
+% 正文小四号字
+\AtBeginDocument{\zihao{-4}}
+
+\newcommand{\examspecialsection}[1]{%
+    \problembodyend
+    \par
+    \medskip
+    \begin{center}
+    \bfseries\zihao{-4}#1
+    \end{center}
+    \setcounter{section}{0}%
+    \medskip
+}
+\newcommand{\additionalproblemsection}{\examspecialsection{附加题}}
+\newcommand{\referenceproblemsection}{\examspecialsection{参考题}}
+\newcommand{\optionalproblemsection}{\examspecialsection{选作题}}
+
+% ==============================================================================
+% 3. 宏包加载 (精简版)
+% ==============================================================================
+\usepackage{geometry}
+\geometry{a4paper,left=2cm,right=2cm,top=2cm,bottom=2cm}
+\newif\ifexampageflexused
+\AddToHook{shipout/after}{\global\exampageflexusedfalse}
+\newcommand{\examavoidshortpage}{%
+    \ifexampageflexused\else
+        \global\exampageflexusedtrue
+        \relax
+    \fi
+}
+
+% 单栏排版；目录页局部使用 multicol
+\usepackage{multicol}
+
+% 数学相关
+\usepackage{amsmath, amssymb, amsthm, bm}
+\usepackage{unicode-math}
+\setmathfont{TeX Gyre Termes Math}
+% 希腊字母使用 STIX 字体 (MathType 风格，正体)
+\setmathfont{STIX}[
+    range = {up/{Greek,greek}, it/{Greek,greek}, bfup/{Greek,greek}, bfit/{Greek,greek}}
+]
+
+% 大运算符和空集使用 Latin Modern Math (LaTeX 默认风格)
+\setmathfont{Latin Modern Math}[
+    range = {\sum, \prod, \coprod, \int, \iint, \iiint, \iiiint, \oint, \bigcup, \bigcap, \bigsqcup, \bigvee, \bigwedge, \bigoplus, \bigotimes, \bigodot}
+]
+\let\emptyset\varnothing
+
+\setmathfont{Asana Math}[
+    range = {\varnothing}
+]
+
+\allowdisplaybreaks
+
+% cases 行距与正文节奏保持一致；amsmath 的 cases 内部会重设 \arraystretch，
+% 所以直接重定义内部入口，避免外层 hook 被覆盖。
+\makeatletter
+\def\env@cases{%
+  \let\@ifnextchar\new@ifnextchar
+  \left\lbrace
+  \def\arraystretch{0.9}%
+  \array{@{}l@{\enspace}l@{}}%
+}
+% An inline cases block is one math atom.  Discard source-line whitespace
+% immediately after the environment so a following Chinese clause is not
+% separated by an accidental interword glue node.
+\def\endcases{\endarray\right.\ignorespacesafterend}
+\makeatother
+
+% 图形与表格
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{xparse}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, calc, intersections, positioning, shapes.geometric, shapes.misc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\pgfplotsset{
+    ybar interval/.append style={
+        x tick label as interval=false,
+    },
+}
+\input{statistical-charts.tex}
+
+\usepackage{wrapfig}
+% 调整 wrapfigure 与正文的间距；普通题内 figure 也采用同一稳定半行距。
+\setlength{\intextsep}{0.45\baselineskip}  % 纵向：图片上下的间距
+\setlength{\textfloatsep}{0.45\baselineskip}
+\setlength{\floatsep}{0.45\baselineskip}
+% \columnsep（横向：图片与侧边文字的间距）已在上方 multicol 区域统一设为 1.5em
+\usepackage{array, tabularray, multirow}
+% 正文依靠 \lineskip 在含显示样式分式的相邻行之间自动避让。array/tabular
+% 内部会把 \lineskip 清零，故进入表格前保存正文间距的一半，由分式上下各承担
+% 一半；相邻两个高行合计仍是一个正文 \lineskip，普通文本行不被无谓拉高。
+\newif\ifexamtablefractioncontext
+\newdimen\examtablefractionclearance
+\newcommand{\examcapturetablefractionclearance}{%
+    \examtablefractionclearance=\lineskip
+    \divide\examtablefractionclearance by 2
+}
+\usepackage{caption}
+\usepackage{placeins}
+% Permit large block figures to use the standard top-float queue even when
+% their measured box is taller than the conservative defaults.
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.70}
+\setcounter{topnumber}{2}
+% Keep float-only pages compact and top-aligned.  The default \@fptop and
+% \@fpbot both contain stretch, which vertically centers a lone figure;
+% reserve the stretch only below the float instead.
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{0.5\baselineskip}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
+\AtEndDocument{\FloatBarrier}
+
+% --- 接管 \includegraphics：找不到文件时显示占位框而非报错 ---
+\let\originalincludegraphics\includegraphics
+\renewcommand{\includegraphics}[2][]{%
+    \problemconsumeinlineblockprefix
+    \IfFileExists{#2}{%
+        \originalincludegraphics[#1]{#2}%
+    }{%
+        \setlength{\fboxsep}{4pt}%
+        \fbox{%
+            \begin{minipage}[c][4em][c]{0.8\linewidth}%
+                \centering\color{gray}\small 图片未找到：{\ttfamily\detokenize{#2}}%
+            \end{minipage}%
+        }%
+    }%
+}
+
+\ExplSyntaxOn
+\bool_new:N \l__bitmap_solution_caption_bool
+\tl_new:N \l__bitmap_solution_caption_tl
+
+\cs_new_protected:Npn \__bitmap_prepare_caption:n #1
+{
+    \bool_set_false:N \l__bitmap_solution_caption_bool
+    \tl_clear:N \l__bitmap_solution_caption_tl
+    \regex_extract_once:nnNT { q([0-9]+)_solution_fig([0-9]+)\.(?:tex|png|jpg|jpeg)$ } {#1} \l_tmpa_seq
+    {
+        \bool_set_true:N \l__bitmap_solution_caption_bool
+        \tl_set:Nx \l__bitmap_solution_caption_tl
+        {第\seq_item:Nn \l_tmpa_seq {2}题解析图\seq_item:Nn \l_tmpa_seq {3}}
+    }
+}
+\NewDocumentCommand{\bitmappreparecaption}{m}
+{
+    \__bitmap_prepare_caption:n {#1}
+}
+\NewDocumentCommand{\bitmapinsertcaption}{}
+{
+    \bool_if:NTF \l__bitmap_solution_caption_bool
+        {\captionof*{figure}{\tl_use:N \l__bitmap_solution_caption_tl}}
+        {\captionof{figure}{}}
+}
+\ExplSyntaxOff
+
+\makeatletter
+\newcommand{\FigureLayoutDeclare}[3]{%
+    \expandafter\gdef
+        \csname bitmaplayout@\detokenize{#1}\endcsname
+        {trim={#3},clip,width=#2,max width=\linewidth}%
+}
+% Trim-only declarations preserve the caller's width/max width controls.  A
+% complete generated layout remains authoritative when both declarations
+% exist for the same image.
+\newcommand{\FigureTrimDeclare}[2]{%
+    \expandafter\gdef
+        \csname bitmaptrim@\detokenize{#1}\endcsname
+        {#2}%
+}
+\InputIfFileExists{tools/typeset/generated_image_layout.tex}{}{}
+\InputIfFileExists{tools/crop/manual_image_layout.tex}{}{}
+
+\newcommand{\bitmapinclude}[2][]{%
+    \begingroup
+    \ifcsname bitmaplayout@\detokenize{#2}\endcsname
+        % 电子稿位图采用生成的白边裁切与标签定标宽度；
+        % 调用处旧的 width/height/scale 不再参与，避免同类题图忽大忽小。
+        \edef\bitmaplayoutoptions{%
+            \csname bitmaplayout@\detokenize{#2}\endcsname
+        }%
+    \else\ifcsname bitmaptrim@\detokenize{#2}\endcsname
+        % Trim-only assets keep the invocation's width/max width while
+        % applying the declared crop.
+        \edef\bitmaplayoutoptions{%
+            trim={\csname bitmaptrim@\detokenize{#2}\endcsname},clip,max width=\linewidth,#1%
+        }%
+    \else
+        % 照片、扫描稿、选项图及低置信度图片保留原调用参数。
+        \def\bitmaplayoutoptions{max width=\linewidth,#1}%
+    \fi\fi
+    \expandafter\adjustbox\expandafter{\bitmaplayoutoptions}{\includegraphics{#2}}%
+    \endgroup
+}
+\makeatother
+
+% TikZ/TeX figure bodies may be read while a problem's continuation
+% \everypar is active.  Keep that paragraph layout out of the boxed figure;
+% the surrounding problem paragraph remains unchanged by this local group.
+\newcommand{\texboxparagraphreset}{%
+    \everypar{}%
+    \leftskip=0pt\relax
+    \rightskip=0pt\relax
+    \parindent=0pt\relax
+    \hangindent=0pt\relax
+    \hangafter=1\relax
+    \parshape=0\relax
+}
+
+% TikZ's /tikz/font key is evaluated after the node text hbox has started in
+% this project, which can leave an invisible leading width when it contains a
+% font command (for example, \normalsize).  Redirect it locally to /tikz/node
+% font so the font is selected before TikZ measures the text hbox.  The key
+% definition lives only inside each figure wrapper group.
+\newcommand{\texboxtikzfontredirect}{%
+    \pgfkeys{/tikz/font/.code={\pgfkeysalso{/tikz/node font={##1}}}}%
+}
+
+% TeX figures are rendered at their authored size, then the finished box is
+% uniformly scaled.  Scaling the box (rather than TikZ coordinates) keeps
+% lines, anchors, nodes, labels and PGFPlots ticks in exactly the same relative
+% geometry.  Source-level \small/\scriptsize/\tiny declarations therefore
+% remain meaningful and are not allowed to create a second, shape-only scale.
+\makeatletter
+\newsavebox{\texfiguremeasurebox}
+\newlength{\texfigurenaturalwidth}
+\newlength{\texfiguretargetwidth}
+\newlength{\texfiguremaxwidth}
+\newlength{\texfigurefinalwidth}
+\newlength{\texfiguremaxnodefontdim}
+\newlength{\texfigurenodefontdim}
+\newlength{\texfigureautotargetwidth}
+\newlength{\texfigurebboxmargin}
+\newlength{\texfiguresavedmaxnodefontdim}
+\setlength{\texfigurebboxmargin}{2.5pt}
+\def\texfigure@width{}
+\def\texfigure@maxwidth{}
+\def\texfigure@scale{1}
+\def\texfigure@haswidth{0}
+\def\texfigure@hasmaxwidth{0}
+\def\texfigure@factor{1}
+\def\texfigure@fontfactor{1}
+\def\texfigure@bodyfontsize{10}
+
+\def\texfigure@parseone#1=#2\@nil{%
+    \edef\texfigure@key{\zap@space#1 \@empty}%
+    \def\texfigure@value{#2}%
+    \ifdefstring{\texfigure@key}{width}{%
+        \def\texfigure@width{#2}%
+        \def\texfigure@haswidth{1}%
+    }{}%
+    % Spaces are removed from keys above, so `max width` is compared as
+    % `maxwidth` here.
+    \ifdefstring{\texfigure@key}{maxwidth}{%
+        \def\texfigure@maxwidth{#2}%
+        \def\texfigure@hasmaxwidth{1}%
+    }{}%
+    \ifdefstring{\texfigure@key}{scale}{\def\texfigure@scale{#2}}{}%
+}
+\def\texfigure@parseopts#1{%
+    \def\texfigure@width{}%
+    \def\texfigure@maxwidth{}%
+    \def\texfigure@scale{1}%
+    \def\texfigure@haswidth{0}%
+    \def\texfigure@hasmaxwidth{0}%
+    \@for\texfigure@item:=#1\do{%
+        \expandafter\texfigure@parseone\texfigure@item\@nil
+    }%
+}
+
+\def\texfigure@input#1{%
+    \texboxparagraphreset
+    \texboxtikzfontredirect
+    % Legacy sources often contain a generous `use as bounding box`
+    % rectangle.  Keep that path visible but make it overlay-only, so TikZ's
+    % automatic box follows actual strokes and labels.  The enclosing measure
+    % adds a small fixed margin.
+    \pgfkeys{/tikz/use as bounding box/.style={overlay}}%
+    \input{#1}%
+}
+
+% TikZ and PGFPlots execute this hook after the node's font keys have been
+% applied.  The assignment is global only for the duration of one measurement:
+% texinclude snapshots and restores the register below, so nested figure
+% groups or surrounding problem text cannot observe the measured value.
+\def\texfigure@recordnodefont{%
+    \ifx\f@size\@undefined\else
+        \texfigurenodefontdim=\f@size pt\relax
+        \ifdim\texfigurenodefontdim>\texfiguremaxnodefontdim
+            \global\texfiguremaxnodefontdim=\texfigurenodefontdim
+        \fi
+    \fi
+}
+
+\def\texfigure@installrecordhooks{%
+    % Append directly to TikZ's internal begin-node accumulator.  Unlike an
+    % `every node/.append style` entry, this survives a source picture that
+    % later replaces `every node/.style=...`; source execute-at-begin-node code
+    % is itself append-only and therefore cannot erase this recorder.
+    \expandafter\def\expandafter\tikz@atbegin@node\expandafter{\tikz@atbegin@node\texfigure@recordnodefont}%
+    % A few legacy nodes select their font from an execute-at-begin hook.  A
+    % matching end hook samples the resulting font after such source code has
+    % run, while remaining inside TikZ's node text group.
+    \expandafter\def\expandafter\tikz@atend@node\expandafter{\tikz@atend@node\texfigure@recordnodefont}%
+    \pgfkeys{/tikz/every node/.append style={execute at begin node={\texfigure@recordnodefont}}}%
+    % PGFPlots tick, title and axis-description nodes normally inherit
+    % /tikz/every node; these explicit hooks cover styles that replace it.
+    \pgfkeys{/pgfplots/every tick label/.append style={execute at begin node={\texfigure@recordnodefont}}}%
+    \pgfkeys{/pgfplots/every axis label/.append style={execute at begin node={\texfigure@recordnodefont}}}%
+    \pgfkeys{/pgfplots/every axis title/.append style={execute at begin node={\texfigure@recordnodefont}}}%
+}
+
+\def\texfigure@measure#1{%
+    \setbox\texfiguremeasurebox=\hbox{%
+        \kern\texfigurebboxmargin
+        \begingroup
+            \texfigure@input{#1}%
+        \endgroup
+        \kern\texfigurebboxmargin
+    }%
+    % Legacy flowcharts frequently declare `baseline` at coordinate y=0
+    % while all visible nodes sit above it.  Rebase the finished picture on
+    % its visible bottom so the box carries no artificial depth below the
+    % artwork (choice figures intentionally bypass texinclude and keep their
+    % dedicated R5-4a baseline behavior).
+    \ifdim\dp\texfiguremeasurebox>0pt
+        \setbox\texfiguremeasurebox=\hbox{%
+            \raisebox{\dp\texfiguremeasurebox}{\box\texfiguremeasurebox}%
+        }%
+    \fi
+    \texfigurenaturalwidth=\wd\texfiguremeasurebox
+}
+
+% Determine one factor for the complete box.  Automatic enlargement raises
+% the largest observed node label to the current body size.  Historical
+% width/max width/scale values below that target are deliberately ignored;
+% explicit enlargement remains honoured, subject only to the final line-width
+% cap.  max width is an upper bound only when it is not smaller than the
+% automatic font target.
+\def\texfigure@setfactor{%
+    \def\texfigure@fontfactor{1}%
+    \ifdim\texfigurenaturalwidth>0pt
+        \ifdim\texfiguremaxnodefontdim>0pt
+            \pgfmathparse{max(1,\texfigure@bodyfontsize / \strip@pt\texfiguremaxnodefontdim)}%
+            \edef\texfigure@fontfactor{\pgfmathresult}%
+        \fi
+        \edef\texfigure@factor{\texfigure@fontfactor}%
+        % scale<1 is a historical shrink request; scale>1 is an explicit
+        % enlargement and participates in the same uniform factor.
+        \pgfmathparse{max(\texfigure@factor,\texfigure@scale)}%
+        \edef\texfigure@factor{\pgfmathresult}%
+        \ifnum\texfigure@haswidth=1
+            \texfiguretargetwidth=\texfigure@width\relax
+            \ifdim\texfiguretargetwidth>\texfigurenaturalwidth
+                \edef\texfigure@ratio{\strip@pt\texfiguretargetwidth/\strip@pt\texfigurenaturalwidth}%
+                \pgfmathparse{max(\texfigure@factor,\texfigure@ratio)}%
+                \edef\texfigure@factor{\pgfmathresult}%
+            \fi
+        \fi
+        % Compute the automatic target in physical units.  A max width below
+        % this target is ignored, preserving readable labels from old calls.
+        \pgfmathparse{\texfigure@fontfactor * \strip@pt\texfigurenaturalwidth}%
+        \texfigureautotargetwidth=\pgfmathresult pt\relax
+        \ifnum\texfigure@hasmaxwidth=1
+            \texfiguremaxwidth=\texfigure@maxwidth\relax
+            \ifdim\texfiguremaxwidth>\texfigureautotargetwidth
+                \pgfmathparse{\texfigure@factor * \strip@pt\texfigurenaturalwidth}%
+                \texfiguretargetwidth=\pgfmathresult pt\relax
+                \ifdim\texfiguretargetwidth>\texfiguremaxwidth
+                    \edef\texfigure@ratio{\strip@pt\texfiguremaxwidth/\strip@pt\texfigurenaturalwidth}%
+                    \pgfmathparse{min(\texfigure@factor,\texfigure@ratio)}%
+                    \edef\texfigure@factor{\pgfmathresult}%
+                \fi
+            \fi
+        \fi
+    \else
+        \def\texfigure@factor{1}%
+    \fi
+    % Final hard cap: only the actual finished box width may force a shrink.
+    \ifdim\texfigurenaturalwidth>0pt
+        \pgfmathparse{\texfigure@factor * \strip@pt\texfigurenaturalwidth}%
+        \texfigurefinalwidth=\pgfmathresult pt\relax
+        \ifdim\texfigurefinalwidth>\linewidth
+            % Leave a tiny numerical safety margin: pgfmath's decimal
+            % rounding can otherwise make \scalebox one or two milli-points
+            % wider than \linewidth in the emitted box.
+            \texfiguretargetwidth=\dimexpr\linewidth-0.1pt\relax
+            \edef\texfigure@ratio{\strip@pt\texfiguretargetwidth/\strip@pt\texfigurenaturalwidth}%
+            \pgfmathparse{min(\texfigure@factor,\texfigure@ratio)}%
+            \edef\texfigure@factor{\pgfmathresult}%
+            \texfigurefinalwidth=\texfiguretargetwidth
+        \fi
+    \else
+        \texfigurefinalwidth=0pt
+    \fi
+}
+
+\newcommand{\texinclude}[2][]{%
+    \begingroup
+        \texfigure@parseopts{#1}%
+        \edef\texfigure@bodyfontsize{\f@size}%
+        \texfiguresavedmaxnodefontdim=\texfiguremaxnodefontdim
+        \global\texfiguremaxnodefontdim=0pt\relax
+        \texfigure@installrecordhooks
+        \texfigure@measure{#2}%
+        \texfigure@setfactor
+        \typeout{TEXFIGURE body-font=\texfigure@bodyfontsize pt recorded-max-node-font=\the\texfiguremaxnodefontdim uniform-factor=\texfigure@factor natural-width=\the\texfigurenaturalwidth final-width=\the\texfigurefinalwidth}%
+        \scalebox{\texfigure@factor}{\box\texfiguremeasurebox}%
+        \global\texfiguremaxnodefontdim=\texfiguresavedmaxnodefontdim
+    \endgroup
+}
+\makeatother
+
+% Block figure float support.  The outer float key is consumed here; every
+% other adjustbox key is forwarded unchanged to bitmapinclude/texinclude.
+\makeatletter
+\newsavebox{\examfigurebox}
+\newlength{\examfigureheight}
+% Remember the source page of each exam figure float.  LaTeX may otherwise
+% put a deferred condition figure at the top of the page where its question
+% starts, which reverses the question/figure order.  The source page is keyed
+% by the float box register and therefore survives the deferlist.
+\newif\ifexamfigure@recordsource
+\examfigure@recordsourcefalse
+\newcount\examfigure@sourcepage
+\examfigure@sourcepage=0
+\newdimen\examfigure@pendingheight
+\examfigure@pendingheight=0pt
+% Height of mapped exam figures already inserted at the current page top.
+% Unlike pendingheight, this must survive queue consumption until the page is
+% shipped: tcolorbox may still compute its page height after the top float has
+% left the defer list but before it is physically shipped.
+\newdimen\examfigure@currenttopheight
+\examfigure@currenttopheight=0pt
+\newcount\examfigure@currenttoppage
+\examfigure@currenttoppage=-1
+\newif\ifexamfigure@tcbreserve
+\examfigure@tcbreservefalse
+\newif\ifexamfigure@tcbready
+\examfigure@tcbreadyfalse
+\def\examfigure@opts{}
+\def\examfigure@float{auto}
+\def\examfigure@modeinline{inline}
+\def\examfigure@modetop{top}
+\ExplSyntaxOn
+\tl_new:N \l__exam_figure_raw_tl
+\tl_new:N \l__exam_figure_float_tl
+\cs_new:Npn \examfigureparsedopts {}
+\cs_new:Npn \examfigureparsedfloat {auto}
+\cs_new_protected:Npn \examfigureparseopts #1
+  {
+    \tl_set:Nn \l__exam_figure_raw_tl {#1}
+    \tl_set:Nn \l__exam_figure_float_tl {auto}
+    \tl_if_in:VnT \l__exam_figure_raw_tl {float}
+      {
+        \regex_extract_once:nnNT
+          { (?:\A|,)\s*float\s*=\s*(auto|inline|top)\s*(?:,|\Z) }
+          { \tl_to_str:V \l__exam_figure_raw_tl } \l_tmpa_seq
+          { \tl_set:Nx \l__exam_figure_float_tl { \seq_item:Nn \l_tmpa_seq {1} } }
+        \regex_replace_once:nnN
+          { \A\s*float\s*=\s*(?:auto|inline|top)\s*,\s* }
+          { }
+          \l__exam_figure_raw_tl
+        \regex_replace_once:nnN
+          { ,\s*float\s*=\s*(?:auto|inline|top)\s*,\s* }
+          { , }
+          \l__exam_figure_raw_tl
+        \regex_replace_once:nnN
+          { \A\s*float\s*=\s*(?:auto|inline|top)\s*\Z }
+          { }
+          \l__exam_figure_raw_tl
+        \regex_replace_once:nnN
+          { ,\s*float\s*=\s*(?:auto|inline|top)\s*\Z }
+          { }
+          \l__exam_figure_raw_tl
+      }
+    % Publish the parsed values as live macros.  A \cs_new_eq:NN alias here
+    % would snapshot the initially empty token lists and silently discard
+    % every bitmapfigure/texfigure option.
+    \cs_set:Npx \examfigureparsedopts
+      { \exp_not:V \l__exam_figure_raw_tl }
+    \cs_set:Npx \examfigureparsedfloat
+      { \exp_not:V \l__exam_figure_float_tl }
+  }
+\ExplSyntaxOff
+\def\examfigure@parseopts#1{%
+    \examfigureparseopts{#1}%
+    % Copy one expansion level so xkeyval receives a literal comma-separated
+    % key list while commands inside values (for example \linewidth) survive.
+    \expandafter\def\expandafter\examfigure@opts
+        \expandafter{\examfigureparsedopts}%
+    \edef\examfigure@float{\examfigureparsedfloat}%
+}
+\def\examfigure@buildbox#1{%
+    \setbox\examfigurebox=\vbox{%
+        \hsize=\linewidth
+        \begin{minipage}{\linewidth}
+            \centering
+            \begingroup
+                \def\theprobnum{\examfigure@frozenprobnum}%
+                #1%
+                \bitmapinsertcaption
+            \endgroup
+        \end{minipage}%
+    }%
+    \examfigureheight=\dimexpr\ht\examfigurebox+\dp\examfigurebox\relax
+}
+% Inline figures are ordinary block content in a problem.  Keep a stable,
+% compact half-line separation from surrounding prose; the caption itself has
+% its own 0.3\baselineskip top skip and therefore does not need extra glue.
+\def\examfigure@emitinline{%
+    % Marker figures are already framed as a continuation slice.  Do not add
+    % the ordinary inline-figure glue here, otherwise the slice acquires the
+    % same visible seam as a float separated by \intextsep.
+    \ifdefined\ifexam@marker@floatcontext
+        \ifexam@marker@floatcontext\else\vspace{0.45\baselineskip}\fi
+    \else
+        \vspace{0.45\baselineskip}%
+    \fi
+    \ifdefined\ifexam@marker@floatcontext
+        \ifexam@marker@floatcontext
+            \begin{tcolorbox}[examanswermarkerfigure]%
+                \box\examfigurebox
+            \end{tcolorbox}%
+        \else
+            \box\examfigurebox
+        \fi
+    \else
+        \box\examfigurebox
+    \fi
+    \par
+    \ifdefined\ifexam@marker@floatcontext
+        \ifexam@marker@floatcontext\else\vspace{0.4\baselineskip}\fi
+    \else
+        \vspace{0.4\baselineskip}%
+    \fi
+}
+\def\examfigure@emitfloatwithspec#1#2{%
+    \ifdim\examfigureheight>\textheight
+        \PackageError{styles}{Figure box too tall for one page}{The figure #2 cannot fit without shrinking; fix the source figure.}%
+        \examfigure@emitinline
+    \else
+        \global\@topnum\z@
+        \examfigure@recordsourcetrue
+        \begin{figure}[#1]
+            \centering
+            \ifdefined\ifexam@marker@floatcontext
+                \ifexam@marker@floatcontext
+                    \begin{tcolorbox}[examanswermarkerfigure]%
+                        \box\examfigurebox
+                    \end{tcolorbox}%
+                \else
+                    \box\examfigurebox
+                \fi
+            \else
+                \box\examfigurebox
+            \fi
+        \end{figure}%
+    \fi
+}
+\def\examfigure@emitfloat#1{\examfigure@emitfloatwithspec{!ht}{#1}}
+\def\examfigure@emittop#1{\examfigure@emitfloatwithspec{!t}{#1}}
+\def\examfigure@queuepending{%
+    \expandafter\ifx\csname examfigure@queued@\number\@currbox\endcsname\relax
+        \expandafter\xdef\csname examfigure@queued@\number\@currbox\endcsname{1}%
+        \expandafter\xdef\csname examfigure@reserved@\number\@currbox\endcsname
+            {\the\dimexpr\ht\@currbox+\dp\@currbox+\textfloatsep\relax}%
+        \global\advance\examfigure@pendingheight by \dimexpr\ht\@currbox+\dp\@currbox+\textfloatsep\relax
+        % The output routine already reduces \@colroom when this top float is
+        % inserted.  Do not pre-reserve the pending height in tcolorbox: that
+        % double-counts the source-page float and strands the next answer box.
+    \fi
+}
+\def\examfigure@queueconsumed{%
+    \expandafter\ifx\csname examfigure@queued@\number\@currbox\endcsname\relax\else
+        \expandafter\ifx\csname examfigure@consumed@\number\@currbox\endcsname\relax
+            \expandafter\xdef\csname examfigure@consumed@\number\@currbox\endcsname{1}%
+            \expandafter\ifx\csname examfigure@reserved@\number\@currbox\endcsname\relax\else
+                \global\advance\examfigure@pendingheight by
+                    -\csname examfigure@reserved@\number\@currbox\endcsname\relax
+                \ifdim\examfigure@pendingheight<0pt
+                    \global\examfigure@pendingheight=0pt\relax
+                \fi
+                \ifnum\examfigure@currenttoppage=\c@page\relax\else
+                    \global\examfigure@currenttopheight=0pt\relax
+                    \global\examfigure@currenttoppage=\c@page\relax
+                \fi
+                \global\advance\examfigure@currenttopheight by
+                    \csname examfigure@reserved@\number\@currbox\endcsname\relax
+            \fi
+        \fi
+    \fi
+}
+% Attach the source page to the newly allocated float box.  This hook is
+% deliberately local to exam figures; unrelated package floats keep LaTeX's
+% normal placement behaviour.
+\let\examfigure@orig@xfloat\@xfloat
+\def\@xfloat#1[#2]{%
+    \examfigure@orig@xfloat{#1}[#2]%
+    \global\expandafter\let\csname examfigure@sourcepage@\number\@currbox\endcsname\relax
+    \global\expandafter\let\csname examfigure@markertopfloat@\number\@currbox\endcsname\relax
+    \ifdefined\ifexam@marker@floatcontext
+        \ifexam@marker@floatcontext
+            \global\expandafter\let\csname examfigure@markertopfloat@\number\@currbox\endcsname\@empty
+        \fi
+    \fi
+    \ifexamfigure@recordsource
+        \global\expandafter\let\csname examfigure@queued@\number\@currbox\endcsname\relax
+        \global\expandafter\let\csname examfigure@reserved@\number\@currbox\endcsname\relax
+        \global\expandafter\let\csname examfigure@consumed@\number\@currbox\endcsname\relax
+        \expandafter\xdef\csname examfigure@sourcepage@\number\@currbox\endcsname{\number\examfigure@sourcepage}%
+        \global\examfigure@recordsourcefalse
+    \fi
+}
+% The output routine reads \textfloatsep only when a deferred top float is
+% finally shipped.  By then the temporary marker-glue settings may already
+% have been restored.  Track the last top float and suppress only the separator
+% between a marker figure and its following answer-box slice; ordinary figures
+% retain the document's normal \textfloatsep.
+\newif\ifexamfigure@lasttopmarker
+\let\examfigure@orig@comflelt\@comflelt
+\def\examfigure@tracked@comflelt#1{%
+    \expandafter\ifx\csname examfigure@markertopfloat@\number#1\endcsname\relax
+        \examfigure@lasttopmarkerfalse
+    \else
+        \examfigure@lasttopmarkertrue
+    \fi
+    \examfigure@orig@comflelt{#1}%
+}
+\patchcmd{\@cflt}
+  {\let\@elt\@comflelt}
+  {\examfigure@lasttopmarkerfalse\let\@elt\examfigure@tracked@comflelt}
+  {}
+  {\PackageError{styles}{Failed to track the final top marker float}
+    {The installed LaTeX output routine is incompatible with the marker figure layout guard.}}
+\patchcmd{\@cflt}
+  {\vskip\textfloatsep}
+  {\ifexamfigure@lasttopmarker\else\vskip\textfloatsep\fi}
+  {}
+  {\PackageError{styles}{Failed to suppress marker top-float separation}
+    {The installed LaTeX output routine is incompatible with the marker figure layout guard.}}
+% On the source page, bypass only the top-float branch.  The ordinary bottom
+% fallback (and the deferlist when no bottom placement is allowed) remains
+% intact.  On the following page, the saved source page is strictly older,
+% so the original top/bottom algorithm is restored.
+\let\examfigure@orig@addtotoporbot\@addtotoporbot
+\def\@addtotoporbot{%
+    \expandafter\ifx\csname examfigure@sourcepage@\number\@currbox\endcsname\relax
+        \examfigure@orig@addtotoporbot
+    \else
+        \ifnum\csname examfigure@sourcepage@\number\@currbox\endcsname<\c@page
+            \examfigure@orig@addtotoporbot
+            \if@insert
+                \examfigure@queueconsumed
+            \else
+                \examfigure@queuepending
+            \fi
+        \else
+            \@addtobot
+            \if@insert\else\examfigure@queuepending\fi
+        \fi
+    \fi
+}
+\let\examfigure@orig@addtocurcol\@addtocurcol
+\def\@addtocurcol{%
+    \examfigure@orig@addtocurcol
+    \expandafter\ifx\csname examfigure@sourcepage@\number\@currbox\endcsname\relax\else
+        \if@insert\else
+            \examfigure@queuepending
+        \fi
+    \fi
+}
+% A consumed mapped top float belongs to the page recorded in
+% examfigure@currenttoppage.  queueconsumed starts a fresh height accumulator
+% whenever output processing advances to another page.
+\def\examfigure@dispatch#1#2#3{%
+    \par\penalty0
+    \examfigure@parseopts{#1}%
+    \edef\examfigure@frozenprobnum{\theprobnum}%
+    \examfigure@sourcepage=\c@page\relax
+    \bitmappreparecaption{#2}%
+    \edef\examfigure@call{\noexpand#3[\unexpanded\expandafter{\examfigure@opts}]{#2}}%
+    \examfigure@buildbox{\examfigure@call}%
+    \ifinner
+        \ifx\examfigure@float\examfigure@modetop
+            \PackageWarning{styles}{float=top ignored in inner mode for #2}%
+        \fi
+        \examfigure@emitinline
+    \else
+        \iftallpage
+            \examfigure@emitinline
+        \else\ifdim\pagegoal=\maxdimen
+            \examfigure@emitinline
+        \else\ifx\examfigure@float\examfigure@modeinline
+            \examfigure@emitinline
+        \else\ifx\examfigure@float\examfigure@modetop
+            \examfigure@emittop{#2}%
+        \else
+            \examfigure@emitfloat{#2}%
+        \fi\fi\fi\fi\fi
+    \endgroup
+}
+\makeatother
+
+\makeatletter
+\newcommand{\bitmapfigure}[2][]{%
+    \begingroup
+    \examfigure@dispatch{#1}{#2}{\bitmapinclude}%
+}
+
+\newif\ifexamchoicegraphic
+\newcount\examchoicegraphiccount
+
+% 独立选择题选项图，供 choices/choicesfive 承载；尺寸由调用方控制。
+% 全局标记只供 \choices 测量阶段识别图片选项；每次测量前都会重置。
+\newcommand{\choicebitmap}[2][]{%
+    \global\examchoicegraphictrue
+    \begingroup
+    \adjustbox{#1,max width=\linewidth,valign=c}{\includegraphics{#2}}%
+    \endgroup
+}
+
+\newcommand{\choicetexfigure}[2][]{%
+    \global\examchoicegraphictrue
+    \begingroup
+    \adjustbox{#1,max width=\linewidth,valign=c}{%
+        \begingroup
+        \texboxparagraphreset
+        \texboxtikzfontredirect
+        \input{#2}%
+        \endgroup
+    }%
+    \endgroup
+}
+
+\newcommand{\texfigure}[2][]{%
+    \begingroup
+    \examfigure@dispatch{#1}{#2}{\texinclude}%
+}
+
+% Controlled composition interface for one logical figure made from several
+% bitmap/TeX panels. Low-level bitmapinclude/texinclude are allowed only in
+% this body; the outer dispatch keeps ordinary examfigure placement/caption
+% behaviour and avoids ad-hoc figure environments in正文.
+\def\examfiguregroup@body{}
+\newcommand{\examfiguregroup@render}[2][]{%
+    \texboxparagraphreset
+    \examfiguregroup@body
+}
+\NewDocumentCommand{\examfiguregroup}{O{} m +m}{%
+    \begingroup
+    \def\examfiguregroup@body{#3}%
+    \examfigure@dispatch{#1}{#2}{\examfiguregroup@render}%
+}
+
+% Narrow controlled exception for figures whose source is a page crop from a
+% PDF. Graphicx keys stay on the inner image; float/placement keys are
+% consumed by examfigure.
+\newcommand{\sourcefigure@render}[2][]{%
+    \adjustbox{valign=c,max width=\linewidth}{\originalincludegraphics[#1]{#2}}%
+}
+\NewDocumentCommand{\sourcefigure}{O{} m}{%
+    \begingroup
+    \examfigure@dispatch{#1}{#2}{\sourcefigure@render}%
+}
+\makeatother
+
+% 频率分布直方图纵轴标签：标签保持正文大小；密集柱高可用可选横移量错列，
+% 引线仍准确落在对应柱高，避免靠缩小字号处理重叠。
+\NewDocumentCommand{\frequencyylabel}{O{-4pt} m m m}{%
+    \draw[black,line width=0.4pt]
+        (axis cs:#2,#3) -- ([xshift=#1]axis cs:#2,#3);
+    \node[anchor=east,inner sep=1pt,font=\normalsize]
+        at ([xshift=#1]axis cs:#2,#3) {#4};
+}
+
+% 列表与枚举
+\usepackage{enumitem}
+\AtBeginEnvironment{center}{\problemcenterstart}
+\AfterEndEnvironment{center}{\problemcenterend}
+\AtBeginEnvironment{tabular}{\problemconsumeinlineblockprefix\examcapturetablefractionclearance\examtablefractioncontexttrue}
+\AtBeginEnvironment{tabular*}{\examcapturetablefractionclearance\examtablefractioncontexttrue}
+
+% 盒子宏包 (用于答案)
+\usepackage[most]{tcolorbox}
+
+% A top float reserves \@colroom even while \pagegoal still reflects the
+% original page goal.  Breakable tcolorbox otherwise computes a box height
+% larger than the space actually left in the column and can cover that float.
+% Apply the reserve only on the first post-break calculation; ordinary page
+% and floating/maxdimen paths retain their native height rules.
+\makeatletter
+\def\examfigure@tcb@normalheight{%
+    \ifdim\pagegoal<\@colroom
+        \tcbdimto\tcb@h@page{\pagegoal-\pagetotal+\tcb@compress@height}%
+    \else
+        \tcbdimto\tcb@h@page{\@colroom-\pagetotal+\tcb@compress@height}%
+    \fi
+}
+\def\examfigure@tcb@reserveheight{%
+    \tcbdimto\tcb@h@page{\textheight-\examfigure@pendingheight+\tcb@compress@height}%
+    \global\examfigure@tcbreservefalse
+    \global\examfigure@tcbreadyfalse
+}
+\def\examfigure@tcb@reserveheightfloat{%
+    \dimen@=\dimexpr\textheight-\examfigure@pendingheight\relax
+    \dimen@ii=\vsize
+    \ifdim\pagetotal<0pt
+        \advance\dimen@ii by \pagetotal
+    \fi
+    \ifdim\dimen@ii<0pt
+        \dimen@ii=0pt
+    \fi
+    \ifdim\dimen@ii<\dimen@
+        \tcbdimto\tcb@h@page{\dimen@ii}%
+    \else
+        \tcbdimto\tcb@h@page{\dimen@}%
+    \fi
+    \global\examfigure@tcbreservefalse
+    \global\examfigure@tcbreadyfalse
+}
+\patchcmd{\tcb@comp@h@page}
+  {\tcbdimto\tcb@h@page{\vsize}}
+   {\ifexamfigure@tcbreserve
+     \ifdim\examfigure@currenttopheight>0pt\relax
+       \ifnum\examfigure@currenttoppage=\c@page\relax
+         \examfigure@tcb@reserveheightfloat
+       \else
+         \tcbdimto\tcb@h@page{\vsize}
+       \fi
+     \else
+     \ifdim\examfigure@pendingheight>0pt\relax
+       \ifexamfigure@tcbready
+         \examfigure@tcb@reserveheightfloat
+       \else
+         \ifnum\c@tcbbreakpart>0\relax
+           \examfigure@tcb@reserveheightfloat
+         \else
+           \tcbdimto\tcb@h@page{\vsize}
+         \fi
+       \fi
+     \else
+       \tcbdimto\tcb@h@page{\vsize}
+     \fi
+     \fi
+   \else
+     \tcbdimto\tcb@h@page{\vsize}
+   \fi}
+  {}
+  {\PackageError{styles}{Failed to patch tcolorbox floating page-height calculation}
+    {The installed tcolorbox breakable implementation is incompatible with the figure layout guard.}}
+\patchcmd{\tcb@comp@h@page}
+  {\tcbdimto\tcb@h@page{\pagegoal-\pagetotal+\tcb@compress@height}}
+  {\ifexamfigure@tcbreserve
+     \ifdim\examfigure@currenttopheight>0pt\relax
+       \ifnum\examfigure@currenttoppage=\c@page\relax
+         \examfigure@tcb@reserveheightfloat
+       \else
+         \ifdim\examfigure@pendingheight>0pt\relax
+           \examfigure@tcb@reserveheight
+         \else
+           \examfigure@tcb@normalheight
+         \fi
+       \fi
+     \else
+       \ifdim\examfigure@pendingheight>0pt\relax
+         \ifexamfigure@tcbready
+           \examfigure@tcb@reserveheight
+         \else
+           \ifnum\c@tcbbreakpart>0\relax
+             \examfigure@tcb@reserveheight
+           \else
+             \examfigure@tcb@normalheight
+           \fi
+         \fi
+       \else
+         \examfigure@tcb@normalheight
+       \fi
+     \fi
+   \else
+     \examfigure@tcb@normalheight
+   \fi}
+  {}
+  {\PackageError{styles}{Failed to patch tcolorbox page-height calculation}
+  {The installed tcolorbox breakable implementation is incompatible with the figure layout guard.}}
+\patchcmd{\tcb@split@pagebreak}
+  {\iftcb@multicol}
+  {\global\examfigure@tcbreadytrue\iftcb@multicol}
+  {}
+  {\PackageError{styles}{Failed to patch tcolorbox page-break reserve hook}
+    {The installed tcolorbox breakable implementation is incompatible with the figure layout guard.}}
+\makeatother
+
+\usepackage{ulem}
+\newcommand{\examblankrule}{\rule[-0.2ex]{5em}{0.4pt}}
+\newcommand{\fillinblank}{%
+    \ifmmode
+        \mathord{\text{\examblankrule}}%
+    \else
+        \unskip\nobreak\examblankrule%
+    \fi
+}
+
+% ==============================================================================
+% 4. 核心命令：题目、选项
+% ==============================================================================
+
+% --- A. 题目计数器 ---
+% 绑定到 chapter，每次新试卷(chapter)自动重置为 0
+% 注意：虽然 chapter 设置了 numbering=false，但计数器依然在后台运作
+\newcounter{probnum}[chapter]
+\newlength{\problembodyindent}
+\setlength{\problembodyindent}{1.5em}
+\newif\ifproblembodyactive
+\newif\ifproblemfirstparagraph
+\newif\ifproblemheadpending
+\newcommand{\problemnumbersuffix}{}
+\newcommand{\reuseproblemnumber}{%
+    \addtocounter{probnum}{-1}%
+}
+
+\newcommand{\problemresetlayout}{%
+    \leftskip=0pt\relax
+    \hangindent=0pt\relax
+    \hangafter=1\relax
+    \parshape=0\relax
+}
+
+\newcommand{\problemheadbox}{%
+    \makebox[\problembodyindent][r]{\textbf{\theprobnum\problemnumbersuffix.}\ }%
+}
+
+\newcommand{\problemheadprefix}{%
+    \textbf{\theprobnum\problemnumbersuffix.}\ %
+}
+\newcommand{\problemoriginallabel}{}%
+
+\newcommand{\problembodyfinish}{%
+    \ifhmode\par\fi
+    \global\problembodyactivefalse
+    \global\problemfirstparagraphfalse
+    \global\problemheadpendingfalse
+    \everypar{}%
+    \parfillskip=0pt plus 1fil\relax
+    \problemresetlayout
+}
+\let\problembodyend\problembodyfinish
+
+\newcommand{\problemliststart}{%
+    \examproseparagraph
+    \ifproblembodyactive
+        \ifhmode\unskip\par\fi
+        \ifproblemheadpending
+            \global\problemfirstparagraphfalse
+            \let\problemoriginallabel\makelabel
+            \def\makelabel##1{%
+                \ifproblemheadpending
+                    \global\problemheadpendingfalse
+                    \llap{\problemheadbox\hspace{0.5em}}%
+                \fi
+                \problemoriginallabel{##1}%
+            }%
+        \fi
+    \fi
+}
+
+\newcommand{\problemblockstart}{%
+    \examproseparagraph
+    \ifproblembodyactive
+        \ifhmode\unskip\par\fi
+        \ifproblemheadpending
+            \global\problemheadpendingfalse
+            \global\problemfirstparagraphfalse
+            \llap{\problemheadprefix}%
+        \fi
+    \fi
+}
+
+\newcommand{\problemconsumeinlineblockprefix}{%
+    \examproseparagraph
+    \ifproblemheadpending
+        \global\problemheadpendingfalse
+        \leavevmode\llap{\problemheadprefix}%
+    \fi
+}
+
+\newcommand{\problemcenterstart}{%
+    \examproseparagraph
+    \ifproblembodyactive
+        \ifhmode\unskip\par\fi
+        \ifproblemheadpending
+            \global\problemfirstparagraphfalse
+            \linewidth=\dimexpr\linewidth-\problembodyindent\relax
+            \hsize=\linewidth
+        \fi
+    \fi
+}
+
+\newcommand{\problemcenterend}{%
+    \ifproblembodyactive
+        \global\everypar{\problemcontinuationpar}%
+    \fi
+}
+
+\makeatletter
+\patchcmd{\@endparenv}
+  {\addpenalty\@endparpenalty\addvspace\@topsepadd\@endpetrue}
+  {\addpenalty\@endparpenalty\addvspace\@topsepadd%
+   \ifproblembodyactive
+     \global\@endpefalse
+     \global\everypar{\problemcontinuationpar}%
+   \else
+     \@endpetrue
+   \fi}
+  {}{}
+
+\newcommand{\problemcontinuationpar}{%
+    \examproseparagraph
+    \ifproblembodyactive
+        \ifnum\@listdepth=\z@
+            \ifproblemfirstparagraph
+                \leftskip=0pt\relax
+                \hangindent=\problembodyindent
+                \hangafter=1
+                \parshape=0\relax
+                \ifproblemheadpending
+                    \problemheadbox
+                    \global\problemheadpendingfalse
+                \fi
+                \global\problemfirstparagraphfalse
+            \else
+                \leftskip=\problembodyindent\relax
+                \hangindent=0pt\relax
+                \hangafter=1\relax
+                \parshape=0\relax
+            \fi
+        \fi
+    \fi
+}
+\makeatother
+
+% --- B. 题目命令 \problem ---
+\newcommand{\problem}[1][]{%
+    \problembodyfinish
+    \examavoidshortpage
+    \stepcounter{probnum}%
+    \def\problemnumbersuffix{#1}%
+    \global\problembodyactivetrue
+    \global\problemfirstparagraphtrue
+    \global\problemheadpendingtrue
+    \examproseparagraph
+    \everypar{\problemcontinuationpar}%
+    \ignorespaces%
+}
+\let\endproblem\problembodyfinish
+
+% --- C. 智能选项 \choices ---
+\newcommand{\choiceentry}[2]{%
+    \hangindent=1.8em\hangafter=1\noindent\textbf{#1.}~#2%
+}
+
+\newcommand{\choicecell}[3]{%
+    \parbox[t]{#1}{\raggedright\textbf{#2.}~#3}%
+}
+
+% 四个图片选项专用：复用普通四选项的 0.22\examchoicewidth 列和 hfill，
+% 保证 A/B/C/D 的列起点一致；标签与图片都按中心基线排放。
+\newcommand{\choicegraphiccell}[3]{%
+    \makebox[#1][l]{%
+        \adjustbox{valign=c}{\textbf{#2.}}\hspace{0.25em}%
+        #3%
+    }%
+}
+
+\newdimen\examchoicewidth
+\newdimen\examchoicewidthA
+\newdimen\examchoicewidthB
+\newdimen\examchoicewidthC
+\newdimen\examchoicewidthD
+\newdimen\examchoicewidthE
+\newdimen\examchoicemaxwidth
+
+\newcommand{\choices}[4]{%
+    \problembodyend
+    % Keep the transition mildly preferred but breakable; do not lock the
+    % entire question to the current page when only the stem's first line fits.
+    \par\penalty300
+    \vspace{4pt}
+    \begingroup
+    \setlength{\leftskip}{\problembodyindent}
+    \examchoicewidth=\dimexpr\linewidth-\problembodyindent\relax
+    \examchoicegraphiccount=0
+    \global\examchoicegraphicfalse
+    \settowidth{\examchoicewidthA}{\textbf{A.}~#1}
+    \ifexamchoicegraphic\advance\examchoicegraphiccount by 1\relax\fi
+    \global\examchoicegraphicfalse
+    \settowidth{\examchoicewidthB}{\textbf{B.}~#2}
+    \ifexamchoicegraphic\advance\examchoicegraphiccount by 1\relax\fi
+    \global\examchoicegraphicfalse
+    \settowidth{\examchoicewidthC}{\textbf{C.}~#3}
+    \ifexamchoicegraphic\advance\examchoicegraphiccount by 1\relax\fi
+    \global\examchoicegraphicfalse
+    \settowidth{\examchoicewidthD}{\textbf{D.}~#4}
+    \ifexamchoicegraphic\advance\examchoicegraphiccount by 1\relax\fi
+    \examchoicemaxwidth=\examchoicewidthA
+    \ifdim\examchoicewidthB>\examchoicemaxwidth \examchoicemaxwidth=\examchoicewidthB \fi
+    \ifdim\examchoicewidthC>\examchoicemaxwidth \examchoicemaxwidth=\examchoicewidthC \fi
+    \ifdim\examchoicewidthD>\examchoicemaxwidth \examchoicemaxwidth=\examchoicewidthD \fi
+    \addtolength{\examchoicemaxwidth}{2em}
+
+    \vspace{-0.2em}\noindent
+    \ifnum\examchoicegraphiccount=4
+        \choicegraphiccell{\dimexpr0.22\examchoicewidth\relax}{A}{#1}\hfill
+        \choicegraphiccell{\dimexpr0.22\examchoicewidth\relax}{B}{#2}\hfill
+        \choicegraphiccell{\dimexpr0.22\examchoicewidth\relax}{C}{#3}\hfill
+        \choicegraphiccell{\dimexpr0.22\examchoicewidth\relax}{D}{#4}%
+    \else\ifdim\examchoicemaxwidth<0.22\examchoicewidth
+        \choicecell{\dimexpr0.22\examchoicewidth\relax}{A}{#1}\hfill
+        \choicecell{\dimexpr0.22\examchoicewidth\relax}{B}{#2}\hfill
+        \choicecell{\dimexpr0.22\examchoicewidth\relax}{C}{#3}\hfill
+        \choicecell{\dimexpr0.22\examchoicewidth\relax}{D}{#4}%
+    \else
+        \ifdim\examchoicemaxwidth<0.47\examchoicewidth
+            \choicecell{\dimexpr0.47\examchoicewidth\relax}{A}{#1}\hfill
+            \choicecell{\dimexpr0.47\examchoicewidth\relax}{B}{#2}\par
+            \vspace{0.2em}
+            \choicecell{\dimexpr0.47\examchoicewidth\relax}{C}{#3}\hfill
+            \choicecell{\dimexpr0.47\examchoicewidth\relax}{D}{#4}%
+        \else
+            \choiceentry{A}{#1}\par
+            \choiceentry{B}{#2}\par
+            \choiceentry{C}{#3}\par
+            \choiceentry{D}{#4}%
+        \fi
+    \fi\fi
+    \global\examchoicegraphicfalse
+    \par
+    \endgroup
+}
+
+% --- D. 五选项 choicesfive ---
+% 排布：5*1行 > 3+2 > 2+2+1 > 竖排
+% 对齐规则：D/E 对齐第一行的 A/B（3+2 时），E 对齐 A（2+2+1 时）
+\newcommand{\choicesfive}[5]{%
+    \problembodyend
+    \par\penalty300
+    \vspace{4pt}
+    \begingroup
+    \setlength{\leftskip}{\problembodyindent}
+    \examchoicewidth=\dimexpr\linewidth-\problembodyindent\relax
+    \settowidth{\examchoicewidthA}{\textbf{A.}~#1}
+    \settowidth{\examchoicewidthB}{\textbf{B.}~#2}
+    \settowidth{\examchoicewidthC}{\textbf{C.}~#3}
+    \settowidth{\examchoicewidthD}{\textbf{D.}~#4}
+    \settowidth{\examchoicewidthE}{\textbf{E.}~#5}
+    \examchoicemaxwidth=\examchoicewidthA
+    \ifdim\examchoicewidthB>\examchoicemaxwidth \examchoicemaxwidth=\examchoicewidthB \fi
+    \ifdim\examchoicewidthC>\examchoicemaxwidth \examchoicemaxwidth=\examchoicewidthC \fi
+    \ifdim\examchoicewidthD>\examchoicemaxwidth \examchoicemaxwidth=\examchoicewidthD \fi
+    \ifdim\examchoicewidthE>\examchoicemaxwidth \examchoicemaxwidth=\examchoicewidthE \fi
+    \addtolength{\examchoicemaxwidth}{2em}
+    \vspace{-0.2em}\noindent
+    % 5 per row
+    \ifdim\examchoicemaxwidth<0.18\examchoicewidth
+        \choicecell{\dimexpr0.18\examchoicewidth\relax}{A}{#1}\hfill
+        \choicecell{\dimexpr0.18\examchoicewidth\relax}{B}{#2}\hfill
+        \choicecell{\dimexpr0.18\examchoicewidth\relax}{C}{#3}\hfill
+        \choicecell{\dimexpr0.18\examchoicewidth\relax}{D}{#4}\hfill
+        \choicecell{\dimexpr0.18\examchoicewidth\relax}{E}{#5}%
+    \else
+    % 3+2: row1=A/B/C, row2=D/E (D对齐A, E对齐B)
+    \ifdim\examchoicemaxwidth<0.30\examchoicewidth
+        \choicecell{\dimexpr0.30\examchoicewidth\relax}{A}{#1}\hfill
+        \choicecell{\dimexpr0.30\examchoicewidth\relax}{B}{#2}\hfill
+        \choicecell{\dimexpr0.30\examchoicewidth\relax}{C}{#3}\par
+        \vspace{0.2em}
+        \choicecell{\dimexpr0.30\examchoicewidth\relax}{D}{#4}\hfill
+        \choicecell{\dimexpr0.30\examchoicewidth\relax}{E}{#5}\hfill
+        \makebox[\dimexpr0.30\examchoicewidth\relax][l]{}%
+    \else
+    % 2+2+1: row1=A/B, row2=C/D, row3=E (E对齐A)
+    \ifdim\examchoicemaxwidth<0.47\examchoicewidth
+        \choicecell{\dimexpr0.47\examchoicewidth\relax}{A}{#1}\hfill
+        \choicecell{\dimexpr0.47\examchoicewidth\relax}{B}{#2}\par
+        \vspace{0.2em}
+        \choicecell{\dimexpr0.47\examchoicewidth\relax}{C}{#3}\hfill
+        \choicecell{\dimexpr0.47\examchoicewidth\relax}{D}{#4}\par
+        \vspace{0.2em}
+        \choiceentry{E}{#5}%
+    \else
+    % vertical
+        \choiceentry{A}{#1}\par
+        \choiceentry{B}{#2}\par
+        \choiceentry{C}{#3}\par
+        \choiceentry{D}{#4}\par
+        \choiceentry{E}{#5}%
+    \fi\fi\fi
+    \par
+    \endgroup
+}
+
+% ==============================================================================
+% 5. 答案控制系统 (框式设计)
+% ==============================================================================
+\newif\ifshowanswer
+\showanswertrue     % 【默认开启】
+
+% 答案框内的 enumerate 不是悬挂列表，而是带自动标签的普通段落流。
+% 第一项可紧跟框标题；嵌套第一项可紧跟父项标签。其余项目及项目内
+% 的显式新段落均沿用答案正文的 2em 首行缩进，续行回到框体左边界。
+\makeatletter
+\newif\ifexamanswerenumfirstitem
+\newif\ifexamanswerenumcontinuefirst
+
+\newcommand{\examanswerenumemititem}[1]{%
+    \ifexamanswerenumfirstitem
+        \ifexamanswerenumcontinuefirst
+            \unskip
+        \else
+            \par\indent
+        \fi
+    \else
+        \par\indent
+    \fi
+    \examanswerenumfirstitemfalse
+    #1\ignorespaces
+}
+
+\newcommand{\examanswerenumstep}{%
+    % Hyperref inserts a zero-width destination between adjacent generated
+    % labels; xeCJK then treats that node as a punctuation boundary and adds
+    % visible space in `（2）（i）`.  The saved kernel refstepcounter retains
+    % counter/\label semantics without injecting that horizontal node.
+    \@ifundefined{H@refstepcounter}{%
+        \refstepcounter{\@enumctr}%
+    }{%
+        \H@refstepcounter{\@enumctr}%
+    }%
+}
+
+\newcommand{\examanswerenumitem}{%
+    \@ifnextchar[\examanswerenumitemexplicit\examanswerenumitemautomatic
+}
+
+\newcommand{\examanswerenumitemautomatic}{%
+    \examanswerenumstep
+    \expandafter\examanswerenumemititem\expandafter{%
+        \csname label\@enumctr\endcsname
+    }%
+}
+
+\def\examanswerenumitemexplicit[#1]{%
+    \examanswerenumstep
+    \examanswerenumemititem{#1}%
+}
+
+\newenvironment{examanswerenumerate}[1][]{%
+    \ifnum\@enumdepth>3\relax
+        \@toodeep
+    \else
+        \ifhmode
+            \examanswerenumcontinuefirsttrue
+        \else
+            \examanswerenumcontinuefirstfalse
+        \fi
+        \advance\@enumdepth\@ne
+        \edef\@enumctr{enum\romannumeral\the\@enumdepth}%
+        \setcounter{\@enumctr}{0}%
+        \examanswerenumfirstitemtrue
+        \let\item\examanswerenumitem
+    \fi
+    \ignorespaces
+}{%
+    \ifnum\@enumdepth=1\relax
+        \par
+    \fi
+}
+
+\newcommand{\examanswerenumeratecontext}{%
+    \def\labelenumi{（\arabic{enumi}）}%
+    \def\labelenumii{（\roman{enumii}）}%
+    % Paragraph-style items temporarily replace \item.  LaTeX's center,
+    % flush and quote environments are based on trivlist and still need the
+    % kernel \item internally, so restore it only inside those local groups.
+    \let\examanswerstandarditem\item
+    \let\examanswerstandardtrivlist\trivlist
+    \def\trivlist{\let\item\examanswerstandarditem\examanswerstandardtrivlist}%
+    \let\enumerate\examanswerenumerate
+    \let\endenumerate\endexamanswerenumerate
+}
+\makeatother
+
+% 定义答案盒子的样式
+\tcbset{
+    examanswer/.style={
+        enhanced jigsaw,
+        breakable,             % 允许跨栏
+        colback=gray!5,        % 极淡的灰色背景
+        colframe=gray!40,      % 边框颜色
+        boxrule=0.5pt,         % 细边框
+        arc=1mm,               % 轻微圆角
+        left=3pt,right=2pt, top=1pt, bottom=1pt,
+        before skip=0.3em,
+        after skip=0.3em,
+        before upper={\examwidoworphanrules\examproseparagraph\setlength{\parindent}{2em}\examanswerenumeratecontext\tolerance=3200\emergencystretch=8em\setlength{\jot}{4pt}\lineskiplimit=3pt\lineskip=4pt\selectfont},
+        fontupper=\zihao{-4},
+    },
+    % Marker slices are named styles rather than inline key lists: keyval
+    % normalizes spaces in dynamically supplied lists, while these definitions
+    % retain tcolorbox's `before skip`/`after skip` keys verbatim.
+    examanswermarkerfirst/.style={
+        examanswer,
+        bottomrule=0pt,
+        arc=0pt,
+        after skip=0pt,
+    },
+    examanswermarkermiddle/.style={
+        examanswer,
+        toprule=0pt,
+        bottomrule=0pt,
+        sharp corners,
+        before skip=0pt,
+        after skip=0pt,
+    },
+    examanswermarkerlast/.style={
+        examanswer,
+        toprule=0pt,
+        arc=0pt,
+        before skip=0pt,
+        boxsep=0.5pt,
+        top=0.5pt,
+        bottom=0.5pt,
+        after skip=0.1em,
+    },
+    examanswermarkerfigure/.style={
+        examanswer,
+        unbreakable,
+        toprule=0pt,
+        bottomrule=0pt,
+        sharp corners,
+        before skip=0pt,
+        after skip=0pt,
+    },
+}
+
+% 答案/解析环境；旧命令写法 \answer{...}、\solution{...} 继续兼容。
+\newbox\examhiddenanswerbox
+\makeatletter
+\newcommand{\examallownextpagebreak}{\@nobreakfalse}
+\newcommand{\answerbegin}{%
+    \problembodyend
+    \ifshowanswer
+        \examallownextpagebreak
+        \begin{tcolorbox}[examanswer]
+            \textbf{【答案】}\ignorespaces
+    \else
+        \setbox\examhiddenanswerbox=\vbox\bgroup\hsize=\linewidth
+    \fi
+}
+\newcommand{\answerend}{%
+    \ifshowanswer
+        \end{tcolorbox}
+    \else
+        \egroup
+    \fi
+}
+\NewDocumentCommand{\answer}{+g}{%
+    \IfNoValueTF{#1}{\answerbegin}{\answerbegin #1\answerend}%
+}
+\let\endanswer\answerend
+
+\newcommand{\solutionbegin}{%
+    \problembodyend
+    \ifshowanswer
+        \examallownextpagebreak
+        \begin{tcolorbox}[examanswer]
+            \textbf{【解析】}\ignorespaces
+    \else
+        \setbox\examhiddenanswerbox=\vbox\bgroup\hsize=\linewidth
+    \fi
+}
+\newcommand{\solutionend}{%
+    \ifshowanswer
+        \end{tcolorbox}
+    \else
+        \egroup
+    \fi
+}
+\makeatother
+
+% Explicit solution/answer figure marker.  It is consumed only by the body
+% collector below; outside a collected body its error keeps accidental use
+% visible instead of silently changing layout.
+\NewDocumentCommand{\solutionfigure}{+m}{%
+    \PackageError{styles}{solutionfigure used outside answer/solution body}%
+        {Wrap the complete figure command in an answer or solution body.}%
+}
+
+\makeatletter
+\ExplSyntaxOn
+\def\exam@marker@stop{\relax}
+\newif\ifexam@marker@first
+\newif\ifexam@marker@forcefirst
+\newif\ifexam@marker@hasmarker
+\newif\ifexam@marker@floatcontext
+\exam@marker@floatcontextfalse
+\newif\ifexam@marker@floatgluezero
+\exam@marker@floatgluezerofalse
+\newskip\exam@marker@savedintextsep
+\newskip\exam@marker@savedtextfloatsep
+\newskip\exam@marker@savedfloatsep
+% A marker float must remain a real float, but its external float glue would
+% visibly break the surrounding examanswer frame.  Keep the original lengths
+% until FloatBarrier has placed all marker floats, then restore them before
+% subsequent ordinary figures are emitted.
+\def\exam@marker@beginfloatglue{%
+    \ifexam@marker@floatgluezero\else
+        \global\exam@marker@savedintextsep=\intextsep
+        \global\exam@marker@savedtextfloatsep=\textfloatsep
+        \global\exam@marker@savedfloatsep=\floatsep
+        \global\intextsep=0pt
+        \global\textfloatsep=0pt
+        \global\floatsep=0pt
+        \global\exam@marker@floatgluezerotrue
+    \fi
+}
+\def\exam@marker@endfloatglue{%
+    \ifexam@marker@floatgluezero
+        \global\intextsep=\exam@marker@savedintextsep
+        \global\textfloatsep=\exam@marker@savedtextfloatsep
+        \global\floatsep=\exam@marker@savedfloatsep
+        \global\exam@marker@floatgluezerofalse
+    \fi
+}
+% A blank line between two solutionfigure markers is tokenized as \par while
+% the body is collected.  Strip only paragraph tokens and surrounding spaces
+% for the emptiness test; any real text, math, or layout command remains a
+% non-blank segment and is rendered normally.
+\prg_new_conditional:Npnn \exam_marker_if_segment_blank:n {p,T,F,TF}
+  {
+    \tl_set:Nn \l_tmpa_tl {##1}
+    \tl_remove_all:Nn \l_tmpa_tl {\par}
+    \tl_if_blank:VTF \l_tmpa_tl
+      {\prg_return_true:}
+      {\prg_return_false:}
+  }
+% A solution figure is a real float and therefore cannot live inside one
+% physical breakable tcolorbox.  The collector below emits visual *slices*
+% of one logical box instead: the slice before a float has no bottom rule or
+% lower rounding, the slice after it has no top rule or upper rounding, and
+% any intervening slice has neither.  The side rules and shared background
+% continue through the float's source page, so this preserves the float's
+% placement/back-fill behaviour without exposing separate rounded boxes.
+\long\def\exam@marker@rendersegment#1#2#3{%
+    \ifexam@marker@forcefirst
+        \begin{tcolorbox}[#3]%
+            \textbf{#1}\ignorespaces
+            #2
+        \end{tcolorbox}%
+        \global\exam@marker@firstfalse
+        \global\exam@marker@forcefirstfalse
+    \else
+      \exam_marker_if_segment_blank:nTF {#2}{%
+        % Empty source segments (including one or more \par tokens) do not
+        % create a visual tcolorbox slice.
+      }{%
+        \begin{tcolorbox}[#3]%
+            \ifexam@marker@first
+                \textbf{#1}\ignorespaces
+            \fi
+            #2
+        \end{tcolorbox}%
+        \global\exam@marker@firstfalse
+      }%
+    \fi
+}
+% The figure command itself still owns the standard float placement.  Mark
+% its construction, so the float box can receive the same gray background and
+% side rules as the surrounding text slices without nesting a float inside a
+% tcolorbox (which would disable floating in inner mode).
+\def\exam@marker@emitfigure#1{%
+    \exam@marker@beginfloatglue
+    \global\exam@marker@floatcontexttrue
+    #1%
+    \global\exam@marker@floatcontextfalse
+}
+\long\def\exam@marker@parse#1\solutionfigure#2#3\exam@marker@end{%
+    \ifx#2\exam@marker@stop
+        \ifexam@marker@hasmarker
+            % The final slice follows the last float.  Its top edge is a
+            % continuation edge; only its bottom edge closes the container.
+            \exam@marker@rendersegment{\exam@marker@heading}{#1}{examanswermarkerlast}%
+        \else
+            \exam@marker@rendersegment{\exam@marker@heading}{#1}{examanswer}%
+        \fi
+    \else
+        \global\exam@marker@hasmarkertrue
+        \ifexam@marker@first
+            \global\exam@marker@forcefirsttrue
+            % First slice: keep the top rounding, but leave the lower edge
+            % open for the continuation slice after the float.
+            \exam@marker@rendersegment{\exam@marker@heading}{#1}{examanswermarkerfirst}%
+        \else
+            % Middle slice between two floats: no horizontal seam at all.
+            \exam@marker@rendersegment{\exam@marker@heading}{#1}{examanswermarkermiddle}%
+        \fi
+        \exam@marker@emitfigure{#2}%
+        % Pass the explicit end sentinel into each recursive parse.  Without
+        % it, the final segment would scan forward to a later solutionfigure
+        % in the document and be rendered a second time.
+        \exam@marker@parse#3\solutionfigure{\exam@marker@stop}\exam@marker@end
+    \fi
+}
+\long\def\exam@marker@rendersliced#1#2{%
+    \def\exam@marker@heading{#1}%
+    \exam@marker@firsttrue
+    \exam@marker@forcefirstfalse
+    \exam@marker@hasmarkerfalse
+    \exam@marker@parse#2\solutionfigure{\exam@marker@stop}\exam@marker@end
+    \ifexam@marker@hasmarker
+        \FloatBarrier
+        \exam@marker@endfloatglue
+    \fi
+}
+% A source enumerate may span one or more solutionfigure markers.  Splitting
+% such a body into physical tcolorbox slices would close a slice while the
+% environment group is still open.  Keep that body in one breakable box and
+% let its marked figures use bitmapfigure/texfigure's existing inner-mode
+% block rendering.  Marker bodies without enumerate retain real-float slices.
+\long\def\exam@marker@renderenumerated#1#2{%
+    \begin{tcolorbox}[examanswer]%
+        \textbf{#1}\ignorespaces
+        \long\def\solutionfigure##1{%
+            \begingroup
+                \parindent=0pt\relax
+                ##1%
+            \endgroup
+        }%
+        #2
+    \end{tcolorbox}%
+}
+\long\def\exam@marker@render#1#2{%
+    \ifshowanswer
+        \problembodyend
+        \examallownextpagebreak
+        \tl_if_in:nnTF {#2} {\begin{enumerate}}%
+            {\tl_if_in:nnTF {#2} {\solutionfigure}%
+                {\exam@marker@renderenumerated{#1}{#2}}%
+                {\exam@marker@rendersliced{#1}{#2}}}%
+            {\exam@marker@rendersliced{#1}{#2}}%
+    \fi
+}
+\long\def\exam@collectsolution#1{\exam@marker@render{\textbf{【解析】}}{#1}}
+\long\def\exam@collectanswer#1{\exam@marker@render{\textbf{【答案】}}{#1}}
+\NewDocumentCommand{\solution}{+g}{%
+    \IfNoValueTF{#1}{\Collect@Body\exam@collectsolution}{\exam@marker@render{\textbf{【解析】}}{#1}}%
+}
+\RenewDocumentCommand{\answer}{+g}{%
+    \IfNoValueTF{#1}{\Collect@Body\exam@collectanswer}{\exam@marker@render{\textbf{【答案】}}{#1}}%
+}
+\let\endanswer\relax
+\ExplSyntaxOff
+\makeatother
+
+% ==============================================================================
+% 5.1 解析区行间公式归一化宏
+% ==============================================================================
+\NewDocumentCommand{\examdisplayaligned}{o +m}{%
+    \[
+    \IfValueTF{#1}{\begin{aligned}[#1]}{\begin{aligned}}
+    #2
+    \end{aligned}
+    \]
+}
+\NewDocumentCommand{\examdisplaycases}{+m +m}{%
+    \[
+    #1\begin{cases}
+    #2
+    \end{cases}
+    \]
+}
+\NewDocumentCommand{\examdisplayarray}{+m m +m +m}{%
+    \[
+    \begingroup
+    \examcapturetablefractionclearance
+    \examtablefractioncontexttrue
+    #1\begin{array}{#2}
+    #3
+    \end{array}#4
+    \endgroup
+    \]
+}
+\NewDocumentCommand{\examdisplaychain}{+m}{%
+    \begin{align*}
+    #1
+    \end{align*}
+}
+
+% ==============================================================================
+% 6. 图表标题定制 (第X题图)
+% ==============================================================================
+\DeclareCaptionLabelFormat{examfig}{第\theprobnum 题图}
+\DeclareCaptionLabelFormat{examtab}{第\theprobnum 题表}
+
+\captionsetup[figure]{
+    labelformat=examfig,
+    labelsep=none,
+    font=small,
+    aboveskip=.3\baselineskip,
+    belowskip=0pt
+}
+\captionsetup[table]{
+    labelformat=examtab,
+    labelsep=none,
+    font=small
+}
+
+% ==============================================================================
+% 7. 辅助符号与工具
+% ==============================================================================
+\renewcommand{\thefootnote}{\circled{\arabic{footnote}}}
+\newcommand{\circled}[2][]{\tikz[baseline=(char.base)]
+    {\node[shape=circle,draw,inner sep=0.8pt](char){\small #2};}}
+\makeatletter
+\renewcommand{\tagform@}[1]{\maketag@@@{\circled{#1}}}
+\makeatother
+
+\newcommand{\R}{\symbfup{R}}
+\newcommand{\Z}{\symbfup{Z}}
+\newcommand{\N}{\mathbb{N}}
+\renewcommand{\Pr}{P}
+\renewcommand{\d}{\text{d}}
+\newcommand{\e}{\text{e}}
+\newcommand{\degree}{^\circ}
+\newcommand{\bs}[1]{\symbfit{#1}}
+\let\oldfrac\frac
+\newcommand{\examtablefractionpad}[1]{%
+    \ifexamtablefractioncontext
+        \mathinner{\raisebox{0pt}%
+            [\dimexpr\height+\examtablefractionclearance\relax]%
+            [\dimexpr\depth+\examtablefractionclearance\relax]%
+            {\ensuremath{#1}}}%
+    \else
+        #1%
+    \fi
+}
+\renewcommand{\frac}[2]{%
+    \mathchoice
+        {\examtablefractionpad{\dfrac{#1}{#2}}}      % 1. Display style；表格中保留大分式并补上下净空
+        {\examtablefractionpad{\dfrac{#1}{#2}}}      % 2. Text style；行内仍强制使用大分式
+        {\oldfrac{\scriptstyle #1}{\scriptstyle #2}} % 3. Script style (指数、上下标) -> 强制分子分母维持 scriptstyle
+        {\oldfrac{\scriptscriptstyle #1}{\scriptscriptstyle #2}} % 4. Scriptscript style (更深层的下标) -> 恢复默认小分式
+}
+
+% 大运算符在行内公式中默认使用显示模式的格式（类似 \frac 的处理）
+\makeatletter
+% 辅助宏：sum 类大运算符（\mathchoice 控制大小，\limits 控制极限位置）
+\newcommand{\make@display@bigop}[2]{% #1=备份命令, #2=原命令
+  \renewcommand{#2}{\mathop{%
+    \mathchoice
+        {#1}%                              % 1. Display style -> 保持原样（已经是大符号）
+        {\displaystyle #1}%                % 2. Text style (行内公式) -> 强制大符号
+        {#1}%                              % 3. Script style (指数、上下标) -> 保持原样
+        {#1}%                              % 4. Scriptscript style -> 保持原样
+  }\limits}}
+% 积分类必须把上下限直接挂在原生积分符上，保留字体的 MathKern 光学校正。
+\newcommand{\apply@integral@scripts}[3]{%
+  #1\IfValueT{#2}{_{#2}}\IfValueT{#3}{^{#3}}%
+}
+\newcommand{\make@display@bigint}[2]{% #1=备份命令, #2=原命令
+  \RenewDocumentCommand{#2}{e{_^}}{%
+    \mathchoice
+        {\apply@integral@scripts{#1}{##1}{##2}}%              % Display style
+        {\displaystyle\apply@integral@scripts{#1}{##1}{##2}}% Text style -> 强制大符号
+        {\apply@integral@scripts{#1}{##1}{##2}}%              % Script style
+        {\apply@integral@scripts{#1}{##1}{##2}}%              % Scriptscript style
+  }}
+\makeatother
+
+% \let\oldlim\lim
+% \renewcommand{\lim}{\oldlim\limits}
+
+\newcommand{\myarc}[1]{\overset{\frown}{#1}}
+
+\SetEnumitemKey{examhang}{%
+    nosep,
+    align=left,
+    before=\problemliststart,
+    labelindent=\problembodyindent,
+    leftmargin=\dimexpr\problembodyindent+\labelwidth+\labelsep\relax,
+    itemindent=0pt,
+    listparindent=0pt,
+    parsep=0pt,
+    topsep=0pt,
+    partopsep=0pt
+}
+
+\setlist[enumerate,1]{ % 仅针对第一层级
+    examhang,
+    label=（\arabic*）,
+    labelsep=0em,
+    widest*=1
+}
+\setlist[enumerate,2]{
+    examhang,
+    label=（\roman*）,
+    labelsep=0em,
+    labelindent=0pt,
+    leftmargin=\dimexpr\labelwidth+\labelsep\relax,
+    widest*=1
+}
+
+% ==============================================================================
+% circlelist：智能多选题选项环境
+%   对齐：标签（圈号）在左边距，正文缩进 \problembodyindent
+%   布局：自动测量每条宽度，决定水平排列 / 双列 / 竖排
+% ==============================================================================
+\ExplSyntaxOn
+\seq_new:N \g__circle_items_seq
+\int_new:N \g__circle_count_int
+\dim_new:N \g__circle_maxwidth_dim
+\dim_new:N \g__circle_availwidth_dim
+\box_new:N \g__circle_measure_box
+
+\NewDocumentEnvironment{circlelist}{O{} +b}{
+  \par\nopagebreak
+  % 按 \item 拆分 body
+  \regex_split:nnN { \c{item}\s* } { #2 } \l_tmpa_seq
+  \seq_pop_left:NN \l_tmpa_seq \l_tmpa_tl
+  \seq_gclear:N \g__circle_items_seq
+  \seq_map_inline:Nn \l_tmpa_seq {
+    \tl_set:Nn \l_tmpa_tl { ##1 }
+    \tl_trim_spaces:N \l_tmpa_tl
+    \seq_gput_right:NV \g__circle_items_seq \l_tmpa_tl
+  }
+  \int_gset:Nn \g__circle_count_int { \seq_count:N \g__circle_items_seq }
+  \int_compare:nNnF { \g__circle_count_int } = { 0 } {
+    % 测量每条宽度
+    \dim_gzero:N \g__circle_maxwidth_dim
+    \int_step_inline:nn { \g__circle_count_int } {
+      \hbox_set:Nn \g__circle_measure_box {
+        \circled{##1}~\seq_item:Nn \g__circle_items_seq { ##1 }
+      }
+      \dim_gset:Nn \g__circle_maxwidth_dim {
+        \dim_max:nn { \g__circle_maxwidth_dim } { \box_wd:N \g__circle_measure_box }
+      }
+    }
+    \dim_gadd:Nn \g__circle_maxwidth_dim { 1em }
+    \dim_set:Nn \g__circle_availwidth_dim { \linewidth - \problembodyindent }
+    \group_begin:
+    \examproseparagraph
+    \setlength{\leftskip}{\problembodyindent}
+    \setlength{\parindent}{0pt}
+    \dim_compare:nNnTF
+      { \g__circle_maxwidth_dim * \g__circle_count_int }
+      < { \g__circle_availwidth_dim }
+    {
+      % 全部在一行
+      \dim_set:Nn \l_tmpa_dim { \g__circle_availwidth_dim / \g__circle_count_int }
+      \int_step_inline:nn { \g__circle_count_int } {
+        \makebox[\l_tmpa_dim][l]{
+          \circled{##1}~\seq_item:Nn \g__circle_items_seq { ##1 }
+        }
+      }
+    }{
+      \dim_compare:nNnTF
+        { \g__circle_maxwidth_dim * 2 }
+        < { \g__circle_availwidth_dim }
+      {
+        % 每行两个
+        \dim_set:Nn \l_tmpa_dim { ( \g__circle_availwidth_dim - 1em ) / 2 }
+        \int_zero:N \l_tmpa_int
+        \int_step_inline:nn { \g__circle_count_int } {
+          \int_incr:N \l_tmpa_int
+          \makebox[\l_tmpa_dim][l]{
+            \circled{##1}~\seq_item:Nn \g__circle_items_seq { ##1 }
+          }
+          \int_compare:nNnTF { \l_tmpa_int } = { 2 } {
+            \par\vspace{0.2em}
+            \int_zero:N \l_tmpa_int
+          }{
+            \hfill
+          }
+        }
+        \int_compare:nNnF { \l_tmpa_int } = { 0 } { \par }
+      }{
+        % 竖排
+        \int_step_inline:nn { \g__circle_count_int } {
+          \hangindent=1.8em\hangafter=1\noindent
+          \circled{##1}~\seq_item:Nn \g__circle_items_seq { ##1 }
+          \par
+        }
+      }
+    }
+    \par
+    \group_end:
+  }
+  \par
+}{}
+\ExplSyntaxOff
+
+% 修改公式与前后文的紧凑度
+\makeatletter
+\g@addto@macro\normalsize{
+    % --- 控制行间公式 (Display Math) ---
+	\setlength\abovedisplayskip{0.25em plus 0.5em minus 0.25em}
+	\setlength\belowdisplayskip{0.25em plus 0.5em minus 0.25em}
+	\setlength\abovedisplayshortskip{0em plus 2pt minus 0pt}
+	\setlength\belowdisplayshortskip{0em plus 2pt minus 0pt}
+
+    % --- 控制行内公式 (Inline Math) 的避让机制 ---
+    % 设置阈值：当两行间距小于 1pt 时触发避让
+    \setlength\lineskiplimit{3pt}
+    % 设置避让间距：触发后强制留出 3pt 的缝隙，防止重叠
+    \setlength\lineskip{3pt}
+}
+\makeatother
+
+\makeatletter
+\AtBeginDocument{
+    % 处理 pi 为正体
+    \let\oldpi\pi
+    \renewcommand{\pi}{\symup\oldpi}
+
+    % 组合数统一改成高中记号 C_n^m；无论源码使用 \binom / \dbinom / \tbinom，
+    % 成稿都输出同一套样式。
+    \RenewDocumentCommand{\binom}{m m}{\mathrm C_{#1}^{#2}}
+    \RenewDocumentCommand{\dbinom}{m m}{\mathrm C_{#1}^{#2}}
+    \RenewDocumentCommand{\tbinom}{m m}{\mathrm C_{#1}^{#2}}
+
+    % 处理 nabla：不带 ^2 时加粗，带 ^2 时（Laplacian）保持原样
+    \let\oldnabla\nabla
+    \RenewDocumentCommand{\nabla}{e{^}}{%
+        \IfValueTF{#1}{% 有上标
+            \ifstrequal{#1}{2}{% 上标是 2
+                \oldnabla^{#1}%
+            }{% 上标不是 2
+                \symbf{\oldnabla}^{#1}%
+            }%
+        }{% 无上标
+            \symbf{\oldnabla}%
+        }%
+    }
+
+    % --- 大运算符：在 \AtBeginDocument 中重定义，确保在 unicode-math 之后 ---
+    % sum 类
+    \let\oldsum\sum             \make@display@bigop{\oldsum}{\sum}
+    \let\oldprod\prod           \make@display@bigop{\oldprod}{\prod}
+    \let\oldcoprod\coprod       \make@display@bigop{\oldcoprod}{\coprod}
+    \let\oldbigcup\bigcup       \make@display@bigop{\oldbigcup}{\bigcup}
+    \let\oldbigcap\bigcap       \make@display@bigop{\oldbigcap}{\bigcap}
+    \let\oldbigsqcup\bigsqcup   \make@display@bigop{\oldbigsqcup}{\bigsqcup}
+    \let\oldbigvee\bigvee       \make@display@bigop{\oldbigvee}{\bigvee}
+    \let\oldbigwedge\bigwedge   \make@display@bigop{\oldbigwedge}{\bigwedge}
+    \let\oldbigoplus\bigoplus   \make@display@bigop{\oldbigoplus}{\bigoplus}
+    \let\oldbigotimes\bigotimes \make@display@bigop{\oldbigotimes}{\bigotimes}
+    \let\oldbigodot\bigodot     \make@display@bigop{\oldbigodot}{\bigodot}
+    % 积分类
+    \let\oldint\int             \make@display@bigint{\oldint}{\int}
+    \let\oldiint\iint           \make@display@bigint{\oldiint}{\iint}
+    \let\oldiiint\iiint         \make@display@bigint{\oldiiint}{\iiint}
+    \let\oldiiiint\iiiint       \make@display@bigint{\oldiiiint}{\iiiint}
+    \let\oldoint\oint           \make@display@bigint{\oldoint}{\oint}
+}
+\makeatother
+
+% PDF 导航：目录与大纲均采用“年份 → 试卷”两级结构。
+\usepackage[hidelinks,bookmarksdepth=chapter,hypertexnames=false]{hyperref}
+\usepackage{bookmark}
+\renewcommand{\i}{\ensuremath{\mathrm{i}}}
+\newcommand{\examyear}[1]{%
+    \clearpage
+    \phantomsection
+    \addcontentsline{toc}{part}{#1}%
+}

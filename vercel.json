@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/img/(.*)",
+      "destination": "https://cdn.jsdelivr.net/gh/CrazyRock114/gaokaoMath_gemini@main/latex_source/img/$1"
+    },
+    {
+      "source": "/img_repaint/(.*)",
+      "destination": "https://cdn.jsdelivr.net/gh/CrazyRock114/gaokaoMath_gemini@main/latex_source/img_repaint/$1"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ]
+}

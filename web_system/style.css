@@ -1,0 +1,111 @@
+/* Custom CSS for Gaokao Math Question Bank System */
+
+/* Smooth KaTeX container */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+  margin: 0.5rem 0 !important;
+}
+
+.katex {
+  font-size: 1.05em;
+  text-rendering: auto;
+}
+
+/* Question stem typography */
+.question-body {
+  line-height: 1.85;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+/* Blank underline styling */
+.math-blank {
+  display: inline-block;
+  min-width: 5rem;
+  border-bottom: 1.5px solid #475569;
+  margin: 0 0.25rem;
+}
+
+/* Option tile interaction */
+.option-tile {
+  transition: all 0.15s ease-in-out;
+}
+.option-tile:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Tab Active State */
+.tab-btn.active {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  font-weight: 700;
+}
+
+/* Print Styles for Exam Paper */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt;
+  }
+
+  header, footer, nav, button, .no-print, #basket-drawer, #question-modal, .tab-btn {
+    display: none !important;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #tab-composer {
+    display: block !important;
+  }
+
+  #tab-explorer, #tab-analytics, #tab-adaptor {
+    display: none !important;
+  }
+
+  .printable-paper {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .exam-problem-item {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 1.5rem !important;
+    border-bottom: 1px dashed #cbd5e1;
+    padding-bottom: 1rem;
+  }
+
+  .student-answer-blank {
+    display: block !important;
+    height: 120px !important;
+    border: 1px solid #94a3b8 !important;
+    margin-top: 10px;
+    background: #fff;
+  }
+}
