@@ -409,113 +409,253 @@
     </section>
 
     <!-- ================================================================ -->
-    <!-- TAB 2: 历年大数据分析大屏 (Analytics) -->
+    <!-- TAB 2: 历年命题规律深度全景大屏 (Analytics) -->
     <!-- ================================================================ -->
     <section id="tab-analytics" class="hidden space-y-6">
       
-      <!-- Top KPIs Banner -->
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-          <div class="text-xs text-slate-500 font-medium">历史跨度</div>
-          <div class="text-2xl font-black text-blue-600 mt-1">75 <span class="text-xs text-slate-400 font-normal">年</span></div>
-          <div class="text-[11px] text-slate-400 mt-0.5">1952年 ～ 2026年</div>
-        </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-          <div class="text-xs text-slate-500 font-medium">真题总题量</div>
-          <div class="text-2xl font-black text-slate-900 mt-1">16,273 <span class="text-xs text-slate-400 font-normal">道</span></div>
-          <div class="text-[11px] text-emerald-600 mt-0.5">全国最全历史收录</div>
-        </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-          <div class="text-xs text-slate-500 font-medium">完整高考试卷</div>
-          <div class="text-2xl font-black text-slate-900 mt-1">775 <span class="text-xs text-slate-400 font-normal">套</span></div>
-          <div class="text-[11px] text-slate-400 mt-0.5">含统考、自主卷、春考</div>
-        </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-          <div class="text-xs text-slate-500 font-medium">权威步骤解答</div>
-          <div class="text-2xl font-black text-emerald-600 mt-1">96.7%</div>
-          <div class="text-[11px] text-slate-400 mt-0.5">15,744 题含详析</div>
-        </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-          <div class="text-xs text-slate-500 font-medium">题图与重绘图</div>
-          <div class="text-2xl font-black text-amber-600 mt-1">3,523 <span class="text-xs text-slate-400 font-normal">幅</span></div>
-          <div class="text-[11px] text-slate-400 mt-0.5">图文题库完美呈现</div>
+      <!-- Top Title & Audience Perspective Switcher -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white rounded-3xl p-6 sm:p-8 shadow-md relative overflow-hidden">
+        <div class="relative z-10 space-y-3">
+          <div class="inline-flex items-center space-x-2 bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-xs border border-blue-400/30">
+            <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+            <span>75年高考数学命题深度研判 · 1952-2026</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black tracking-tight text-white">
+            高考数学全景命题深度大数据大屏
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+            专为<strong>高考考生、家长与高中数学教师</strong>打造的命题规律与备考决策系统。深入剖析试卷 150 分黄金得分盘面、六大主干模块权重演变、各省市命题哲学差异及未来命题风向标。
+          </p>
+
+          <!-- Perspective Tabs -->
+          <div class="pt-2 flex flex-wrap items-center gap-2">
+            <span class="text-xs text-slate-400 font-medium mr-1">决策视角切换：</span>
+            <button id="perspective-btn-student" onclick="setAnalyticsPerspective('student')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-xs">
+              🎓 考生备战提分指南
+            </button>
+            <button id="perspective-btn-parent" onclick="setAnalyticsPerspective('parent')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-white/10 hover:bg-white/20 text-slate-200">
+              👨‍👩‍👧 家长陪考策略认知
+            </button>
+            <button id="perspective-btn-teacher" onclick="setAnalyticsPerspective('teacher')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-white/10 hover:bg-white/20 text-slate-200">
+              🧑‍🏫 教师命题与二轮教研
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Charts Row 1: Historical Timeline & Knowledge Breakdown -->
+      <!-- Dynamic Perspective Content Container -->
+      <div id="analytics-perspective-content" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+        <!-- Filled dynamically by app.js based on selected perspective -->
+      </div>
+
+      <!-- Section 1: 150-Point Exam Score Architecture & Difficulty Ladder -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 flex items-center space-x-2">
+              <i data-lucide="layers" class="w-5 h-5 text-blue-600"></i>
+              <span>高考试卷 150 分得分金字塔与黄金盘面透视</span>
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">剖析 75 年真题试卷的分值结构，明确各分段考生的提分基本盘与突破口</p>
+          </div>
+          <span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-xs font-bold font-mono">新高考 19 题制 150 分标准</span>
+        </div>
+
+        <!-- 3 Tier Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <!-- Basic Tier -->
+          <div class="border border-emerald-200 bg-emerald-50/40 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-emerald-800 text-sm flex items-center space-x-1">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                <span>基础得分基本盘 (必拿分)</span>
+              </span>
+              <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[11px]">75 ~ 85 分 (约55%)</span>
+            </div>
+            <p class="text-slate-600 text-[11px] leading-relaxed">
+              <strong>考查范围：</strong>集合与常用逻辑、复数、平面向量数量积、三角恒等基本求值、立体几何线面垂直证明(第1问)、统计抽样直方图。
+            </p>
+            <div class="bg-white p-2.5 rounded-lg border border-emerald-100 text-slate-700 text-[11px]">
+              <strong class="text-emerald-700">战术要求：</strong>通性通法直接应用。审题细致、公式精准，杜绝任何非智力失误，确保全员100%全拿。
+            </div>
+          </div>
+
+          <!-- Medium Tier -->
+          <div class="border border-blue-200 bg-blue-50/40 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-blue-800 text-sm flex items-center space-x-1">
+                <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
+                <span>中档区分攻坚区 (突破分)</span>
+              </span>
+              <span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[11px]">40 ~ 45 分 (约28%)</span>
+            </div>
+            <p class="text-slate-600 text-[11px] leading-relaxed">
+              <strong>考查范围：</strong>多选前两题、空间向量求二面角与线面角、解几第1问求轨迹方程/离心率、导数切线与单调区间、全概率公式与分布列。
+            </p>
+            <div class="bg-white p-2.5 rounded-lg border border-blue-100 text-slate-700 text-[11px]">
+              <strong class="text-blue-700">战术要求：</strong>逻辑推理与运算并重，多选题严格“保二争三”，大题前两问必须按步骤写满步骤分。
+            </div>
+          </div>
+
+          <!-- Advanced Tier -->
+          <div class="border border-purple-200 bg-purple-50/40 rounded-xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-purple-800 text-sm flex items-center space-x-1">
+                <i data-lucide="award" class="w-4 h-4 text-purple-600"></i>
+                <span>高分压轴决胜区 (冲刺分)</span>
+              </span>
+              <span class="bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded text-[11px]">20 ~ 25 分 (约17%)</span>
+            </div>
+            <p class="text-slate-600 text-[11px] leading-relaxed">
+              <strong>考查范围：</strong>多选第11题复杂代数几何综合、填空第14题新情境开放探索、导数极值点偏移/隐零点/不等式构造、第19题新定义探究。
+            </p>
+            <div class="bg-white p-2.5 rounded-lg border border-purple-100 text-slate-700 text-[11px]">
+              <strong class="text-purple-700">战术要求：</strong>考查数学抽象、猜想归纳与极限转化能力，打破机械刷题，区分冲击985与顶尖名校考生。
+            </div>
+          </div>
+        </div>
+
+        <!-- 19-Question Exam Blueprint -->
+        <div class="pt-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
+            <div class="text-slate-500 font-medium">单项选择题 (8题)</div>
+            <div class="text-lg font-black text-slate-900 mt-0.5">40 分</div>
+            <div class="text-[11px] text-slate-400">每题5分 · 筑牢通性通法</div>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
+            <div class="text-slate-500 font-medium">多项选择题 (3题)</div>
+            <div class="text-lg font-black text-indigo-600 mt-0.5">18 分</div>
+            <div class="text-[11px] text-indigo-500">每题6分 · 漏选部分分/错选0分</div>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
+            <div class="text-slate-500 font-medium">填空题 (3题)</div>
+            <div class="text-lg font-black text-slate-900 mt-0.5">15 分</div>
+            <div class="text-[11px] text-slate-400">每题5分 · 第14题常设创新</div>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
+            <div class="text-slate-500 font-medium">解答大题 (5题)</div>
+            <div class="text-lg font-black text-blue-600 mt-0.5">77 分</div>
+            <div class="text-[11px] text-blue-500">单题13~17分 · 梯度步步设坎</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Core Knowledge Pillars 75-Year Analysis & Exam Matrix -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 flex items-center space-x-2">
+              <i data-lucide="bar-chart-2" class="w-5 h-5 text-indigo-600"></i>
+              <span>六大主干知识域 75 年分值权重与考查规律矩阵</span>
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">函数导数与圆锥曲线双雄鼎立，立体几何与现代统计稳健赋能</p>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">1952-2026 全样本统计</span>
+        </div>
+
+        <!-- Charts Row: Average Score Bar & Category Pie -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <div class="text-xs font-bold text-slate-700 flex items-center space-x-1">
+              <span>六大核心板块平均分值权重对比 (卷面150分分布)</span>
+            </div>
+            <div class="h-64">
+              <canvas id="chart-pillars-score"></canvas>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="text-xs font-bold text-slate-700 flex items-center space-x-1">
+              <span>75年高考数学核心板块总题量分布占比</span>
+            </div>
+            <div class="h-64">
+              <canvas id="chart-category-pie"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillars Detailed Table -->
+        <div class="overflow-x-auto pt-2">
+          <table class="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden">
+            <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[11px]">
+              <tr>
+                <th class="py-2.5 px-3">核心知识域</th>
+                <th class="py-2.5 px-3">高考平均分</th>
+                <th class="py-2.5 px-3">命题频率与题型</th>
+                <th class="py-2.5 px-3">必考典型考法</th>
+                <th class="py-2.5 px-3">高频失分陷阱</th>
+                <th class="py-2.5 px-3">备考攻坚建议</th>
+              </tr>
+            </thead>
+            <tbody id="pillars-table-body" class="divide-y divide-slate-100 text-slate-600">
+              <!-- Populated dynamically by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 3: Regional Signatures & Provincial Radar -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 flex items-center space-x-2">
+              <i data-lucide="map-pin" class="w-5 h-5 text-amber-600"></i>
+              <span>全国主要省市及卷种命题哲学与风格深度画像</span>
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">自主命题与全国卷的地域特色、思维导向与提分对策</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <label class="text-xs font-semibold text-slate-700">切换卷种/省市：</label>
+            <select id="provincial-selector" onchange="renderProvincialProfile()" class="text-xs border border-slate-300 rounded-lg px-3 py-1.5 bg-slate-50 font-bold text-slate-800 focus:ring-2 focus:ring-blue-500">
+              <option value="新高考全国I卷">新高考全国I卷 (苏鲁粤闽等)</option>
+              <option value="新高考全国II卷">新高考全国II卷 (辽黑吉桂等)</option>
+              <option value="北京卷">北京自主命题卷</option>
+              <option value="上海卷">上海自主命题卷</option>
+              <option value="浙江历史卷">浙江卷 (历史名卷)</option>
+              <option value="江苏历史卷">江苏卷 (历史名卷)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
+          <!-- Left: Profile Description -->
+          <div class="lg:col-span-2 space-y-3" id="provincial-detail-card">
+            <!-- Dynamically populated -->
+          </div>
+          <!-- Right: Radar Chart -->
+          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50 flex flex-col justify-between">
+            <div class="text-xs font-bold text-slate-700 mb-2">五维能力考查雷达画像</div>
+            <div class="h-60">
+              <canvas id="chart-provincial-radar"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: 75-Year Evolution & 2026+ Future Trends -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        <!-- Chart: 75 Years Trend -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-          <div class="flex items-center justify-between">
-            <h3 class="font-bold text-slate-900 flex items-center space-x-2">
-              <i data-lucide="line-chart" class="w-5 h-5 text-blue-600"></i>
-              <span>1952-2026年 高考数学题量历史走势</span>
-            </h3>
-            <span class="text-xs text-slate-400 font-mono">从6题大题制到分省命题繁荣</span>
-          </div>
-          <div class="h-72">
-            <canvas id="chart-year-trend"></canvas>
+        <!-- Historical Eras -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <h3 class="text-base font-extrabold text-slate-900 flex items-center space-x-2">
+            <i data-lucide="history" class="w-5 h-5 text-blue-600"></i>
+            <span>75 年高考数学命题哲学五大演进纪元</span>
+          </h3>
+          <div class="space-y-3 text-xs" id="eras-cards-container">
+            <!-- Populated from analysis json in app.js -->
           </div>
         </div>
 
-        <!-- Chart: Knowledge Taxonomy Share -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-          <div class="flex items-center justify-between">
-            <h3 class="font-bold text-slate-900 flex items-center space-x-2">
-              <i data-lucide="pie-chart" class="w-5 h-5 text-indigo-600"></i>
-              <span>十大核心知识域 75 年总题量占比</span>
-            </h3>
-            <span class="text-xs text-slate-400 font-mono">三角/解几/导数鼎立</span>
-          </div>
-          <div class="h-72">
-            <canvas id="chart-category-pie"></canvas>
+        <!-- 2026+ Future Trends -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <h3 class="text-base font-extrabold text-slate-900 flex items-center space-x-2">
+            <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i>
+            <span>2026+ 未来高考数学命题三大核心风向标</span>
+          </h3>
+          <div class="space-y-3 text-xs" id="future-trends-container">
+            <!-- Populated from analysis json in app.js -->
           </div>
         </div>
 
-      </div>
-
-      <!-- Charts Row 2: Regional Differences & Question Types -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Chart: Question Types Evolution -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-          <div class="flex items-center justify-between">
-            <h3 class="font-bold text-slate-900 flex items-center space-x-2 text-sm">
-              <i data-lucide="layers" class="w-4 h-4 text-emerald-600"></i>
-              <span>题型结构历史占比</span>
-            </h3>
-          </div>
-          <div class="h-64">
-            <canvas id="chart-section-types"></canvas>
-          </div>
-        </div>
-
-        <!-- Chart: Regional Styles Radar -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3 lg:col-span-2">
-          <div class="flex items-center justify-between">
-            <h3 class="font-bold text-slate-900 flex items-center space-x-2 text-sm">
-              <i data-lucide="radar" class="w-4 h-4 text-amber-600"></i>
-              <span>主要命题主体风格画像对比（全国卷 vs 江苏 vs 上海 vs 北京 vs 浙江）</span>
-            </h3>
-          </div>
-          <div class="h-64">
-            <canvas id="chart-regional-radar"></canvas>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Historical Eras Monograph Cards -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-        <h3 class="text-base font-extrabold text-slate-900 flex items-center space-x-2">
-          <i data-lucide="history" class="w-5 h-5 text-blue-600"></i>
-          <span>高考数学 75 年五大历史时期命题哲学综述</span>
-        </h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs" id="eras-cards-container">
-          <!-- Populated from analysis json in app.js -->
-        </div>
       </div>
 
     </section>
@@ -613,75 +753,205 @@
     <!-- ================================================================ -->
     <section id="tab-adaptor" class="hidden space-y-6">
       
-      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-        <div class="flex items-center justify-between">
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
             <h2 class="text-lg font-extrabold text-slate-900 flex items-center space-x-2">
               <i data-lucide="wand-2" class="w-5 h-5 text-indigo-600"></i>
-              <span>高考真题变式与改编工坊 (Problem Adaptor)</span>
+              <span>高考真题 AI 变式与改编工坊 (Problem Adaptor & Variant Studio)</span>
             </h2>
-            <p class="text-xs text-slate-500 mt-1">深度剖析原题数学内核，提供参数化变式、逆向提问、几何迁移与跨情境改编方案。</p>
+            <p class="text-xs text-slate-500 mt-1">
+              解构真题内核数学模型，支持<strong>参数化变式、逆向提问、模型外推与高阶追问</strong>四大科学改编体系，赋能分层教学与举一反三。
+            </p>
           </div>
-          <button onclick="loadSampleAdaptation()" class="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-semibold">
-            载入典型导数极值点偏移压轴题改编示例
-          </button>
+          
+          <!-- UID Loader Box -->
+          <div class="flex items-center space-x-2 text-xs">
+            <input id="adaptor-custom-uid" type="text" placeholder="输入真题UID，如 GK-2026-national_paper_1-19" class="px-3 py-1.5 border border-slate-300 rounded-lg w-64 text-xs font-mono focus:ring-2 focus:ring-indigo-500">
+            <button onclick="loadCustomUidAdaptation()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold flex items-center space-x-1 shadow-xs transition-all">
+              <i data-lucide="search" class="w-3.5 h-3.5"></i>
+              <span>载入母题</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Adaptor Workspace Grid -->
+        <!-- Curated Mother Questions Quick Bar -->
+        <div class="space-y-1.5">
+          <div class="text-xs font-bold text-slate-700 flex items-center space-x-1">
+            <i data-lucide="bookmark" class="w-3.5 h-3.5 text-blue-600"></i>
+            <span>六大高考高频典型母题快捷载入：</span>
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <button id="curated-btn-0" onclick="loadCuratedAdaptation(0)" class="curated-btn px-2.5 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg font-semibold transition-all">
+              📐 导数极值点偏移压轴
+            </button>
+            <button id="curated-btn-1" onclick="loadCuratedAdaptation(1)" class="curated-btn px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200 rounded-lg text-slate-700 font-medium transition-all">
+              🔵 圆锥曲线定点定值
+            </button>
+            <button id="curated-btn-2" onclick="loadCuratedAdaptation(2)" class="curated-btn px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200 rounded-lg text-slate-700 font-medium transition-all">
+              🧊 立体几何二面角证明
+            </button>
+            <button id="curated-btn-3" onclick="loadCuratedAdaptation(3)" class="curated-btn px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200 rounded-lg text-slate-700 font-medium transition-all">
+              📈 递推数列裂项放缩
+            </button>
+            <button id="curated-btn-4" onclick="loadCuratedAdaptation(4)" class="curated-btn px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200 rounded-lg text-slate-700 font-medium transition-all">
+              🎲 超几何分布与博弈决策
+            </button>
+            <button id="curated-btn-5" onclick="loadCuratedAdaptation(5)" class="curated-btn px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200 rounded-lg text-slate-700 font-medium transition-all">
+              🔺 解三角形面积取值范围
+            </button>
+          </div>
+        </div>
+
+        <!-- Adaptation Strategies Selector (4 Dimensions) -->
+        <div class="bg-indigo-50/60 border border-indigo-100 rounded-xl p-3 space-y-2">
+          <div class="text-xs font-bold text-indigo-950 flex items-center justify-between">
+            <span class="flex items-center space-x-1.5">
+              <i data-lucide="sliders" class="w-4 h-4 text-indigo-600"></i>
+              <span>选择改编变式维度与策略：</span>
+            </span>
+            <span id="current-strategy-badge" class="bg-indigo-600 text-white px-2 py-0.5 rounded text-[11px] font-semibold">当前策略：参数与系数变式</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <button id="strategy-btn-param" onclick="selectAdaptationStrategy('param')" class="strategy-btn active p-2.5 rounded-lg border text-left transition-all bg-white border-indigo-500 shadow-xs">
+              <div class="font-bold text-indigo-900">🔢 参数与系数变式</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">保持骨架，调整参数常数与约束</div>
+            </button>
+            <button id="strategy-btn-inverse" onclick="selectAdaptationStrategy('inverse')" class="strategy-btn p-2.5 rounded-lg border text-left transition-all bg-slate-50/80 border-slate-200 hover:bg-white text-slate-700">
+              <div class="font-bold text-slate-800">🔄 条件与结论逆转</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">已知最值/定点反求初始函数参数</div>
+            </button>
+            <button id="strategy-btn-context" onclick="selectAdaptationStrategy('context')" class="strategy-btn p-2.5 rounded-lg border text-left transition-all bg-slate-50/80 border-slate-200 hover:bg-white text-slate-700">
+              <div class="font-bold text-slate-800">🌐 模型外推与情境迁移</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">纯数迁移至实际科技/三维几何</div>
+            </button>
+            <button id="strategy-btn-extension" onclick="selectAdaptationStrategy('extension')" class="strategy-btn p-2.5 rounded-lg border text-left transition-all bg-slate-50/80 border-slate-200 hover:bg-white text-slate-700">
+              <div class="font-bold text-slate-800">🚀 阶梯拔高与追问拓展</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">引入新高考19题模式新定义设问</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Adaptor Workspace Grid (Mother vs Variant) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
           
-          <!-- Left: Original Question Card -->
-          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50 space-y-3">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-slate-700">【母题原题】</span>
-              <span id="adaptor-orig-uid" class="font-mono text-blue-600">GK-2026-national_paper_1-19</span>
+          <!-- Left: Mother Question Card -->
+          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/40 space-y-3 flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-xs border-b border-slate-200 pb-2">
+                <span class="font-bold text-slate-800 flex items-center space-x-1">
+                  <i data-lucide="book-open" class="w-4 h-4 text-blue-600"></i>
+                  <span>【母题原题档案】</span>
+                </span>
+                <span id="adaptor-orig-uid" class="font-mono text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded">GK-2026-national_paper_1-19</span>
+              </div>
+              <div id="adaptor-orig-paper" class="text-xs text-slate-500 font-medium">来源试卷：2026年普通高等学校招生全国统一考试数学卷（全国I卷）</div>
+              
+              <!-- Mother Body -->
+              <div class="space-y-1">
+                <span class="text-xs font-semibold text-slate-700">原题题干：</span>
+                <div id="adaptor-orig-body" class="text-sm bg-white p-4 rounded-xl border border-slate-200 text-slate-800 leading-relaxed font-serif min-h-[140px]">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+
+              <!-- Mother Tags -->
+              <div id="adaptor-orig-tags" class="flex flex-wrap gap-1 text-[11px]"></div>
+
+              <!-- Mother Solution Accordion -->
+              <div class="pt-2">
+                <details class="group bg-white border border-slate-200 rounded-lg text-xs overflow-hidden">
+                  <summary class="cursor-pointer px-3 py-2 bg-slate-50 font-semibold text-slate-700 flex items-center justify-between">
+                    <span>查看母题官方标准解答与参考答案</span>
+                    <span class="text-blue-600 text-[11px] group-open:rotate-180 transition-transform">▼</span>
+                  </summary>
+                  <div class="p-3 border-t border-slate-100 space-y-2 bg-white font-serif">
+                    <div><strong>参考答案：</strong><span id="adaptor-orig-answer" class="text-amber-700 font-mono"></span></div>
+                    <div class="text-slate-600 leading-relaxed" id="adaptor-orig-solution"></div>
+                  </div>
+                </details>
+              </div>
             </div>
-            <div id="adaptor-orig-body" class="text-sm bg-white p-3 rounded-lg border border-slate-200/80 min-h-[120px]">
-              <!-- Filled dynamically -->
-            </div>
-            <div id="adaptor-orig-tags" class="flex flex-wrap gap-1 text-[11px]">
-              <!-- Tags -->
+
+            <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-200 flex items-center justify-between">
+              <span>母题考查核心能力：运算求解与通性通法</span>
+              <button onclick="copyOrigLatex()" class="text-blue-600 hover:underline">复制母题 LaTeX</button>
             </div>
           </div>
 
-          <!-- Right: Adaptation Guidelines & Derivative Problem -->
-          <div class="border border-indigo-100 bg-indigo-50/30 rounded-xl p-4 space-y-4">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-indigo-900 flex items-center space-x-1">
-                <i data-lucide="lightbulb" class="w-4 h-4 text-indigo-600"></i>
-                <span>【改编维度与变式策略】</span>
-              </span>
-              <span class="text-indigo-600 font-medium">智能启发推荐</span>
-            </div>
-
-            <!-- Strategy Checklist -->
-            <div id="adaptor-strategies-list" class="space-y-2 text-xs text-slate-700">
-              <!-- Dynamically populated -->
-            </div>
-
-            <!-- Parameters Table -->
-            <div class="space-y-1.5 text-xs">
-              <span class="font-semibold text-slate-800">可调整代数参数：</span>
-              <div id="adaptor-params-list" class="flex flex-wrap gap-1.5">
-                <!-- Dynamically populated -->
-              </div>
-            </div>
-
-            <!-- Generated Variation Card -->
-            <div class="border border-emerald-200 bg-white rounded-lg p-3 text-xs space-y-2 shadow-xs">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-emerald-800 flex items-center space-x-1">
-                  <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
-                  <span>【变式生成试题预览】</span>
+          <!-- Right: AI Variant Generation & Editable Studio -->
+          <div class="border border-indigo-200 bg-indigo-50/20 rounded-xl p-4 space-y-4 flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between text-xs border-b border-indigo-100 pb-2">
+                <span class="font-bold text-indigo-950 flex items-center space-x-1.5">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
+                  <span>【智能变式试题工作台 (支持实时编辑)】</span>
                 </span>
-                <span class="bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded font-mono text-[10px]">新高考改编版</span>
+                <span id="adaptor-variant-tag" class="bg-indigo-100 text-indigo-800 font-semibold px-2 py-0.5 rounded text-[11px]">新高考改编版</span>
               </div>
-              <div id="adaptor-variation-body" class="text-slate-800 text-sm font-serif">
-                <!-- Dynamically populated -->
+
+              <!-- Strategy Intent Insight -->
+              <div id="adaptor-intent-box" class="bg-white/80 p-2.5 rounded-lg border border-indigo-100 text-xs text-indigo-900 leading-relaxed">
+                <!-- Intent description -->
               </div>
-              <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-100 flex items-center justify-between">
-                <span>命题意图：保持对称差构造核心思想，提升隐零点判定思维深度。</span>
-                <button onclick="addVariationToBasket()" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold">加入组卷</button>
+
+              <!-- Live KaTeX Preview Card -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-xs font-semibold text-slate-700">
+                  <span>变式排版实时渲染预览：</span>
+                  <span class="text-[10px] text-slate-400 font-mono">KaTeX 数学公式原生渲染</span>
+                </div>
+                <div id="adaptor-preview-box" class="bg-white p-4 rounded-xl border border-indigo-200 text-slate-900 text-sm leading-relaxed font-serif min-h-[140px] shadow-xs">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+
+              <!-- Editable Inputs Details -->
+              <details class="bg-white border border-slate-200 rounded-lg text-xs overflow-hidden">
+                <summary class="cursor-pointer px-3 py-2 bg-slate-50 font-semibold text-slate-700 flex items-center justify-between">
+                  <span>✏️ 在线微调编辑变式题干与解析 (可选)</span>
+                  <span class="text-blue-600 text-[11px]">展开编辑 ▼</span>
+                </summary>
+                <div class="p-3 border-t border-slate-100 space-y-3">
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">变式题干文本 (支持 LaTeX 公式 $...$)：</label>
+                    <textarea id="edit-variant-body" oninput="updateVariantPreviewFromEdit()" rows="4" class="w-full text-xs font-serif border border-slate-300 rounded p-2 focus:ring-2 focus:ring-indigo-500"></textarea>
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">参考答案：</label>
+                    <input id="edit-variant-answer" oninput="updateVariantPreviewFromEdit()" type="text" class="w-full text-xs font-mono border border-slate-300 rounded p-1.5 focus:ring-2 focus:ring-indigo-500">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">分步推导与评分标准：</label>
+                    <textarea id="edit-variant-solution" oninput="updateVariantPreviewFromEdit()" rows="4" class="w-full text-xs font-serif border border-slate-300 rounded p-2 focus:ring-2 focus:ring-indigo-500"></textarea>
+                  </div>
+                </div>
+              </details>
+
+            </div>
+
+            <!-- Actions Bar -->
+            <div class="pt-3 border-t border-indigo-100 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center space-x-2 text-xs">
+                <button onclick="copyVariantLatex()" class="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg font-medium shadow-xs">
+                  📋 复制 LaTeX
+                </button>
+                <button onclick="copyVariantMarkdown()" class="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg font-medium shadow-xs">
+                  📝 复制 Markdown
+                </button>
+              </div>
+
+              <div class="flex items-center space-x-2 text-xs">
+                <button onclick="printMotherVariantComparison()" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg font-semibold shadow-xs">
+                  🖨️ 导出母题+变式讲义
+                </button>
+                <button onclick="addCurrentVariantToBasket()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-xs flex items-center space-x-1.5">
+                  <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                  <span>加入试卷篮</span>
+                </button>
               </div>
             </div>
 
