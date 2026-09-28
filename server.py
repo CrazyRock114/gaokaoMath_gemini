@@ -24,6 +24,16 @@ CATALOG_JSON = os.path.join(WORKSPACE, "question_bank", "catalog.json")
 IMG_DIR = os.path.join(WORKSPACE, "latex_source", "img")
 IMG_REPAINT_DIR = os.path.join(WORKSPACE, "latex_source", "img_repaint")
 
+# Build case-insensitive lookup table for canonical image paths
+IMAGE_CASE_MAP = {}
+if os.path.exists(IMG_DIR):
+    for root, dirs, files in os.walk(IMG_DIR):
+        for f in files:
+            full_p = os.path.join(root, f)
+            rel = os.path.relpath(full_p, IMG_DIR)
+            IMAGE_CASE_MAP[rel.lower()] = rel
+
+
 def get_db():
     """Connect to SQLite database in read-only mode for zero lock/journal issues."""
     try:
@@ -100,13 +110,14 @@ class GaokaoMathHandler(SimpleHTTPRequestHandler):
 
         # Static assets: /img/...
         if path.startswith("/img/"):
-            rel_img = path[5:]  # remove /img/
-            local_path = os.path.join(IMG_DIR, rel_img)
+            rel_img = path[5:].lstrip("/")  # remove /img/
+            canonical_rel = IMAGE_CASE_MAP.get(rel_img.lower(), rel_img)
+            local_path = os.path.join(IMG_DIR, canonical_rel)
             if os.path.exists(local_path):
                 self.serve_file(local_path)
             else:
-                # Redirect to jsDelivr CDN
-                cdn_url = f"https://cdn.jsdelivr.net/gh/CrazyRock114/gaokaoMath_gemini@main/latex_source/img/{rel_img}"
+                # Redirect to jsDelivr CDN using canonical casing
+                cdn_url = f"https://cdn.jsdelivr.net/gh/CrazyRock114/gaokaoMath_gemini@main/latex_source/img/{canonical_rel}"
                 self.send_response(307)
                 self.send_header("Location", cdn_url)
                 self.send_header("Cache-Control", "public, max-age=31536000, immutable")

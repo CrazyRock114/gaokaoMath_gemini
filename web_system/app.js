@@ -45,9 +45,36 @@ function formatMathHtml(text) {
   if (!text) return '';
   // 1. Clean choice parentheses artifacts: e.g. （\(\quad\)） or （\quad） -> （　　）
   let s = text.replace(/[（(]\s*(?:\\\(|\$)?\s*\\quad(?:\s*\\quad)*\s*(?:\\\)|\$)?\s*[）)]/g, '（　　）');
-  // 2. Safely escape '<' so math inequalities like -1<x<3 are not treated as HTML tags by browser innerHTML
-  s = s.replace(/<(?!\/?(?:div|img|span|p|br|table|thead|tbody|tr|th|td)\b)/gi, '&lt;');
+  // 2. Safely normalize fill-in blanks inside math mode (e.g. \(a=______\))
+  s = s.replace(/(\\\([\s\S]*?\\\))|(\$\$[\s\S]*?\$\$)|(\\\[[\s\S]*?\\\])/g, (math) => {
+    return math.replace(/_{2,}/g, '\\underline{\\hspace{2.5em}}');
+  });
+  // 3. Remove math delimiters erroneously wrapping <div> or <table> tags
+  s = s.replace(/\\\(\s*(<div[\s\S]*?<\/div>)\s*\\\)/g, '$1');
+  s = s.replace(/\\\[\s*(<div[\s\S]*?<\/div>)\s*\\\]/g, '$1');
+  // 4. Safely escape '<' so math inequalities like -1<x<3 are not treated as HTML tags by browser innerHTML
+  s = s.replace(/<(?!\/?(?:div|img|span|p|br|table|thead|tbody|tr|th|td|strong|b|i|em)\b)/gi, '&lt;');
   return s;
+}
+
+// Render friendly solution content or informative notice for questions without official solution
+function renderSolutionContent(solution, answer) {
+  const trimmed = (solution || '').trim();
+  const ansTrimmed = (answer || '').trim();
+  const isTrivial = !trimmed || trimmed === '略' || trimmed === '详见推导步骤。' || trimmed === '详见解析' || (ansTrimmed && trimmed === ansTrimmed);
+  
+  if (isTrivial) {
+    return `
+      <div class="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl text-xs space-y-1">
+        <div class="font-bold text-amber-900 flex items-center space-x-1.5">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-amber-700"></i>
+          <span>【官方解析提示】真题原卷未附详细分步推导（标准参考答案已审校齐备）</span>
+        </div>
+        <p class="text-slate-600 text-[11px] leading-relaxed">参考答案及考点已严格核对准确无误。建议点击上方或卡片「✨ 试题改编」进行变式探究或自主推导演练。</p>
+      </div>
+    `;
+  }
+  return `<div class="solution-text whitespace-pre-wrap leading-relaxed">${formatMathHtml(trimmed)}</div>`;
 }
 
 // Render KaTeX in target DOM element
@@ -61,6 +88,12 @@ function renderMath(targetEl) {
         { left: '$', right: '$', display: false },
         { left: '\\(', right: '\\)', display: false }
       ],
+      macros: {
+        "\\e": "\\mathrm{e}",
+        "\\i": "\\mathrm{i}",
+        "\\bs": "\\boldsymbol",
+        "\\myarc": "\\overset{\\frown}{#1}"
+      },
       throwOnError: false,
       ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
     });
@@ -278,19 +311,17 @@ function renderQuestionsList() {
 
         <!-- Collapsible Solution Drawer -->
         <div id="solution-drawer-${q.uid}" class="hidden border-t border-slate-100 pt-3 space-y-2.5">
-          ${q.answer ? `
-            <div class="bg-amber-50/80 border border-amber-200/90 rounded-xl p-3 flex items-center space-x-2 text-xs">
-              <span class="font-bold text-amber-900">【参考答案】</span>
-              <span class="font-mono font-extrabold text-amber-800 text-sm">${formatMathHtml(q.answer)}</span>
-            </div>
-          ` : ''}
+          <div class="bg-amber-50/80 border border-amber-200/90 rounded-xl p-3 flex items-center space-x-2 text-xs">
+            <span class="font-bold text-amber-900 shrink-0">【参考答案】</span>
+            <span class="font-mono font-extrabold text-amber-800 text-sm">${q.answer ? formatMathHtml(q.answer) : '<span class="font-sans font-normal text-xs text-amber-700">详见以下解答步骤与得分点</span>'}</span>
+          </div>
           
           <div class="bg-slate-50 rounded-xl p-4 border border-slate-200/80 text-xs text-slate-800 font-serif leading-relaxed space-y-2">
             <div class="font-bold text-slate-900 text-xs flex items-center space-x-1.5">
               <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
               <span>【官方/权威详尽推导与解析】</span>
             </div>
-            <div class="solution-text whitespace-pre-wrap pt-1">${formatMathHtml(q.solution || '暂无详细步骤推导。')}</div>
+            ${renderSolutionContent(q.solution, q.answer)}
           </div>
         </div>
 
@@ -567,8 +598,8 @@ function renderComposedPaper() {
     if (state.paperViewMode === 'teacher') {
       teacherBox = `
         <div class="mt-3 p-3 bg-amber-50/70 border border-amber-200 rounded-lg text-xs space-y-1 font-serif text-slate-800">
-          <div class="font-bold text-amber-900">【参考答案】<span class="font-mono text-amber-800">${formatMathHtml(q.answer || '详见解析')}</span> （考查模块：${q.category} · 难度：${q.difficulty}）</div>
-          <div class="text-slate-700 whitespace-pre-wrap pt-1 border-t border-amber-200/60 leading-relaxed">${formatMathHtml(q.solution || '解析略')}</div>
+          <div class="font-bold text-amber-900">【参考答案】<span class="font-mono text-amber-800">${q.answer ? formatMathHtml(q.answer) : '<span class="font-sans font-normal text-xs text-amber-700">详见以下解答推导</span>'}</span> （考查模块：${q.category} · 难度：${q.difficulty}）</div>
+          <div class="pt-1 border-t border-amber-200/60">${renderSolutionContent(q.solution, q.answer)}</div>
         </div>
       `;
     }
@@ -1320,7 +1351,13 @@ function printMotherVariantComparison() {
               { left: '\\[', right: '\\]', display: true },
               { left: '$', right: '$', display: false },
               { left: '\\(', right: '\\)', display: false }
-            ]
+            ],
+            macros: {
+              "\\e": "\\mathrm{e}",
+              "\\i": "\\mathrm{i}",
+              "\\bs": "\\boldsymbol",
+              "\\myarc": "\\overset{\\frown}{#1}"
+            }
           });
           setTimeout(() => { window.print(); }, 600);
         });
@@ -1921,10 +1958,10 @@ function renderReaderPaperContent() {
       teacherBox = `
         <div class="mt-3 p-4 bg-amber-50/80 border border-amber-200 rounded-xl text-xs space-y-1.5 font-serif text-slate-800">
           <div class="font-bold text-amber-900 flex items-center justify-between">
-            <span>【参考答案】<span class="font-mono text-amber-800 text-sm ml-1">${formatMathHtml(q.answer || '详见解析')}</span></span>
+            <span>【参考答案】<span class="font-mono text-amber-800 text-sm ml-1">${q.answer ? formatMathHtml(q.answer) : '<span class="font-sans font-normal text-xs text-amber-700">详见以下解答步骤</span>'}</span></span>
             <span class="text-amber-700 font-sans text-[11px]">考查：${q.category} · 难度：${q.difficulty}</span>
           </div>
-          <div class="text-slate-700 whitespace-pre-wrap pt-1 border-t border-amber-200/70 leading-relaxed">${formatMathHtml(q.solution || '详见推导步骤。')}</div>
+          <div class="pt-1 border-t border-amber-200/70">${renderSolutionContent(q.solution, q.answer)}</div>
         </div>
       `;
     }
