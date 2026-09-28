@@ -58,6 +58,16 @@ class GaokaoMathHandler(SimpleHTTPRequestHandler):
         if not query and parsed.query:
             query = urllib.parse.parse_qs(parsed.query)
 
+        # Handle Vercel rewrite mapping via __route__ query parameter
+        if "__route__" in query:
+            route_val = query.get("__route__", [""])[0]
+            if route_val:
+                path = "/api/" + route_val.lstrip("/")
+        elif path in ["/api/index.py", "/api/index", "/api"]:
+            route_val = query.get("route", [""])[0]
+            if route_val:
+                path = "/api/" + route_val.lstrip("/")
+
         # API: /api/stats
         if path == "/api/stats":
             self.handle_api_stats()
@@ -143,7 +153,21 @@ class GaokaoMathHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
         req_uri = self.headers.get("x-matched-path") or self.headers.get("x-forwarded-uri") or self.path
         parsed = urllib.parse.urlparse(req_uri)
-        if parsed.path == "/api/compose":
+        path = parsed.path
+        query = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        if not query and parsed.query:
+            query = urllib.parse.parse_qs(parsed.query)
+
+        if "__route__" in query:
+            route_val = query.get("__route__", [""])[0]
+            if route_val:
+                path = "/api/" + route_val.lstrip("/")
+        elif path in ["/api/index.py", "/api/index", "/api"]:
+            route_val = query.get("route", [""])[0]
+            if route_val:
+                path = "/api/" + route_val.lstrip("/")
+
+        if path == "/api/compose":
             self.handle_api_compose()
             return
         self.send_error(404, "Not Found")
