@@ -26,7 +26,6 @@ import hashlib
 import urllib.request
 import urllib.parse
 import urllib.error
-from collections import Counter
 
 WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(WORKSPACE, "question_bank", "gaokao_math.db")
@@ -206,6 +205,16 @@ class SystematicVerifier:
                 self.add_finding("L5", "Medium", "难度分级与 JSON 脱节", f"难度 {diff}: DB={cnt} vs JSON={json_difficulties.get(diff)}")
         if diff_match:
             self.log_pass(len(db_difficulties))
+
+        # 3.6 Categories cross-lock
+        cat_match = True
+        for cat, cnt in db_categories.items():
+            if json_categories.get(cat) != cnt:
+                cat_match = False
+                self.add_finding("L5", "Medium", "核心考点分类统计与 JSON 脱节",
+                                 f"分类 {cat}: DB={cnt} vs JSON={json_categories.get(cat)}")
+        if cat_match:
+            self.log_pass(len(db_categories))
 
         self.inventory = {
             "papers": db_papers_count,
@@ -470,6 +479,7 @@ class SystematicVerifier:
         self.cursor.execute("""
             SELECT uid, solution FROM questions
             WHERE solution IS NOT NULL AND length(solution) > 50
+            ORDER BY uid ASC
             LIMIT 1500
         """)
         eq_pattern = re.compile(r'([0-9.()+\*×÷\s\\/-]{2,30})\s*=\s*([0-9.()+\*×÷\s\\/-]{1,20})')
@@ -543,14 +553,28 @@ class SystematicVerifier:
 
         # 2. Lucide Icon Validity Check in index.html
         icon_names = set(re.findall(r'data-lucide="([^"]+)"', html))
-        valid_icons = all(re.match(r'^[a-z0-9-]+$', name) for name in icon_names)
-        if valid_icons and len(icon_names) > 20:
-            self.log_pass(len(icon_names))
-            print(f"  [L5 图标生态] 扫描到 {len(icon_names)} 处 Lucide 图标标记，命名规范全部有效。")
+        if not icon_names:
+            self.add_finding("L5", "Low", "未在页面中检测到 Lucide 图标", "页面缺少 data-lucide 属性声明")
         else:
-            self.add_finding("L5", "Low", "存在不合法的 Lucide 图标名称", f"检测到 {len(icon_names)} 个图标")
+            invalid_list = [name for name in icon_names if not re.match(r'^[a-z0-9-]+$', name)]
+            if invalid_list:
+                self.add_finding("L5", "Low", "存在不合法的 Lucide 图标名称", f"检测到非法图标命名: {invalid_list}")
+            else:
+                self.log_pass(len(icon_names))
+                print(f"  [L5 图标生态] 扫描到 {len(icon_names)} 处 Lucide 图标标记，命名规范全部有效。")
 
-        # 3. CSS/JS Linked Asset Paths
+        # 3. Frontend Script & Null-Safety Guardrails Audit (app.js)
+        if os.path.exists(APP_JS_PATH):
+            with open(APP_JS_PATH, "r", encoding="utf-8") as f:
+                js_content = f.read()
+            if "p.paper_name ||" in js_content and "p.paper_type ||" in js_content:
+                self.log_pass(2)
+            else:
+                self.add_finding("L1", "Medium", "前端脚本关键数据缺乏空安全防御", "app.js 缺少针对 paper_name/paper_type 的空对象兜底处理")
+        else:
+            self.add_finding("L1", "High", "前端主脚本文件不存在", f"无法找到 {APP_JS_PATH}")
+
+        # 4. CSS/JS Linked Asset Paths
         css_links = re.findall(r'<link[^>]+href="([^"]+)"', html)
         script_srcs = re.findall(r'<script[^>]+src="([^"]+)"', html)
         for link in css_links + script_srcs:
@@ -563,7 +587,7 @@ class SystematicVerifier:
                 else:
                     self.add_finding("L5", "High", "页面静态引用资源在本地不存在", f"资源: {link}")
 
-        print("  [L5 级联疫苗] 前端无陈旧数字硬编码，动静资源路径闭合检验通过。")
+        print("  [L5 级联疫苗] 前端无陈旧数字硬编码，动静资源路径与脚本空安全检验通过。")
 
     # =========================================================================
     # Phase 7: L6 State Machine & API Boundary Penetration
@@ -624,7 +648,7 @@ class SystematicVerifier:
 
             print(f"  [L6 接口通电] 核心 API 正常请求与逆向/越界拦截全部通过（共测试 {len(test_routes)} 种典型调用）。")
         else:
-            print("  [L6 提示] 本地服务端口 8088 未响应，跳过动态 HTTP 测试。")
+            self.add_finding("L6", "High", "本地 API 服务未启动", "端口 8088 未响应，无法执行 L6 接口真实通电与逆向路径测试")
 
     # =========================================================================
     # Phase 8: L7/L8 Fingerprint Signoff & Claim-to-Data Audit
@@ -641,12 +665,14 @@ class SystematicVerifier:
         ]
 
         historical_state = {}
+        state_loaded = False
         if os.path.exists(SIGNOFF_STATE_PATH):
             try:
                 with open(SIGNOFF_STATE_PATH, "r", encoding="utf-8") as f:
                     historical_state = json.load(f)
-            except Exception:
-                pass
+                state_loaded = True
+            except Exception as e:
+                print(f"  [L7 警告] 无法解析 {SIGNOFF_STATE_PATH}: {e}，跳过指纹落盘以避免覆盖既有审定状态。")
 
         new_state = {}
         for uid, desc in editorial_targets:
@@ -655,18 +681,27 @@ class SystematicVerifier:
             sol = r[0] if r else ""
             h = hashlib.sha256(sol.encode('utf-8')).hexdigest()[:16]
             prev = historical_state.get(uid, {})
-            status = prev.get("status", "APPROVED")
+            prev_hash = prev.get("hash")
+
+            if prev_hash and prev_hash != h:
+                status = "NEEDS_REVIEW"
+                self.add_finding("L7", "High", f"审定注记内容指纹漂移: {uid}",
+                                 f"哈希由 {prev_hash} 变为 {h}，需人工重新签核")
+            else:
+                status = prev.get("status", "APPROVED")
+                self.log_pass(1)
+
             new_state[uid] = {
                 "desc": desc,
                 "hash": h,
                 "status": status,
                 "length": len(sol)
             }
-            self.log_pass(1)
 
-        os.makedirs(os.path.dirname(SIGNOFF_STATE_PATH), exist_ok=True)
-        with open(SIGNOFF_STATE_PATH, "w", encoding="utf-8") as f:
-            json.dump(new_state, f, ensure_ascii=False, indent=2)
+        if state_loaded or not os.path.exists(SIGNOFF_STATE_PATH):
+            os.makedirs(os.path.dirname(SIGNOFF_STATE_PATH), exist_ok=True)
+            with open(SIGNOFF_STATE_PATH, "w", encoding="utf-8") as f:
+                json.dump(new_state, f, ensure_ascii=False, indent=2)
 
         print(f"  [L7 指纹状态机] 关键人工审定注记已计算 SHA-256 签名并落盘于 {os.path.basename(SIGNOFF_STATE_PATH)}。")
 
@@ -693,6 +728,16 @@ class SystematicVerifier:
         print("\n============================================================")
         print("  [Phase 9] S9 Arbitration & Synthesis")
         print("============================================================")
+
+        if self.inventory:
+            print("--- 系统基数互锁大纲 (System Inventory) ---")
+            print(f"  • 试卷总数: {self.inventory.get('papers')} 套")
+            print(f"  • 试题总数: {self.inventory.get('questions')} 道")
+            print(f"  • 年份跨度: {self.inventory.get('years')}")
+            print(f"  • 核心考点分类: {self.inventory.get('categories')} 个大类")
+            diff_map = self.inventory.get('difficulties', {})
+            print(f"  • 难度分布: 基础={diff_map.get('基础')}, 中档={diff_map.get('中档')}, 压轴={diff_map.get('压轴')}")
+            print()
 
         total_findings = len(self.findings)
         print(f"\n[Systematic Verifier] 穷举断言通过: {self.passed_assertions} 项")
