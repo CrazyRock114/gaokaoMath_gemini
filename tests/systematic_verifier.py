@@ -208,13 +208,16 @@ class SystematicVerifier:
 
         # 3.6 Categories cross-lock
         cat_match = True
-        for cat, cnt in db_categories.items():
-            if json_categories.get(cat) != cnt:
+        all_categories = set(db_categories) | set(json_categories)
+        for cat in all_categories:
+            db_cnt = db_categories.get(cat)
+            json_cnt = json_categories.get(cat)
+            if db_cnt != json_cnt:
                 cat_match = False
                 self.add_finding("L5", "Medium", "核心考点分类统计与 JSON 脱节",
-                                 f"分类 {cat}: DB={cnt} vs JSON={json_categories.get(cat)}")
+                                 f"分类 {cat}: DB={db_cnt} vs JSON={json_cnt}")
         if cat_match:
-            self.log_pass(len(db_categories))
+            self.log_pass(len(all_categories))
 
         self.inventory = {
             "papers": db_papers_count,
@@ -556,7 +559,7 @@ class SystematicVerifier:
         if not icon_names:
             self.add_finding("L5", "Low", "未在页面中检测到 Lucide 图标", "页面缺少 data-lucide 属性声明")
         else:
-            invalid_list = [name for name in icon_names if not re.match(r'^[a-z0-9-]+$', name)]
+            invalid_list = sorted(name for name in icon_names if not re.match(r'^[a-z0-9-]+$', name))
             if invalid_list:
                 self.add_finding("L5", "Low", "存在不合法的 Lucide 图标名称", f"检测到非法图标命名: {invalid_list}")
             else:
@@ -570,9 +573,9 @@ class SystematicVerifier:
             if "p.paper_name ||" in js_content and "p.paper_type ||" in js_content:
                 self.log_pass(2)
             else:
-                self.add_finding("L1", "Medium", "前端脚本关键数据缺乏空安全防御", "app.js 缺少针对 paper_name/paper_type 的空对象兜底处理")
+                self.add_finding("L5", "Medium", "前端脚本关键数据缺乏空安全防御", "app.js 缺少针对 paper_name/paper_type 的空对象兜底处理")
         else:
-            self.add_finding("L1", "High", "前端主脚本文件不存在", f"无法找到 {APP_JS_PATH}")
+            self.add_finding("L5", "High", "前端主脚本文件不存在", f"无法找到 {APP_JS_PATH}")
 
         # 4. CSS/JS Linked Asset Paths
         css_links = re.findall(r'<link[^>]+href="([^"]+)"', html)
@@ -682,10 +685,11 @@ class SystematicVerifier:
             h = hashlib.sha256(sol.encode('utf-8')).hexdigest()[:16]
             prev = historical_state.get(uid, {})
             prev_hash = prev.get("hash")
+            prev_status = prev.get("status")
 
-            if prev_hash and prev_hash != h:
+            if (prev_hash and prev_hash != h) or prev_status == "NEEDS_REVIEW":
                 status = "NEEDS_REVIEW"
-                self.add_finding("L7", "High", f"审定注记内容指纹漂移: {uid}",
+                self.add_finding("L7", "High", f"审定注记内容需人工签核: {uid}",
                                  f"哈希由 {prev_hash} 变为 {h}，需人工重新签核")
             else:
                 status = prev.get("status", "APPROVED")
@@ -698,12 +702,14 @@ class SystematicVerifier:
                 "length": len(sol)
             }
 
-        if state_loaded or not os.path.exists(SIGNOFF_STATE_PATH):
+        wrote_state = state_loaded or not os.path.exists(SIGNOFF_STATE_PATH)
+        if wrote_state:
             os.makedirs(os.path.dirname(SIGNOFF_STATE_PATH), exist_ok=True)
             with open(SIGNOFF_STATE_PATH, "w", encoding="utf-8") as f:
                 json.dump(new_state, f, ensure_ascii=False, indent=2)
-
-        print(f"  [L7 指纹状态机] 关键人工审定注记已计算 SHA-256 签名并落盘于 {os.path.basename(SIGNOFF_STATE_PATH)}。")
+            print(f"  [L7 指纹状态机] 关键人工审定注记已计算 SHA-256 签名并落盘于 {os.path.basename(SIGNOFF_STATE_PATH)}。")
+        else:
+            print(f"  [L7 指纹状态机] 跳过状态落盘（避免覆盖未解析文件 {os.path.basename(SIGNOFF_STATE_PATH)}）。")
 
         # 2. Claim-to-Data Audit
         with open(ANALYSIS_JSON_PATH, "r", encoding="utf-8") as f:
