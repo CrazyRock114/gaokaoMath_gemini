@@ -21,7 +21,12 @@ from collections import Counter
 
 WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(WORKSPACE, "question_bank", "gaokao_math.db")
-AUDIT_DIR = os.environ.get("AUDIT_DIR", "/Users/crazyrock/ZCodeProject/gaokaomath/workdir/audit_math3/audit/labels")
+DEFAULT_AUDIT_DIR = os.path.join(WORKSPACE, "question_bank", "audit_labels")
+AUDIT_DIR = os.environ.get("AUDIT_DIR", DEFAULT_AUDIT_DIR)
+if not os.path.exists(AUDIT_DIR):
+    local_fallback = "/Users/crazyrock/ZCodeProject/gaokaomath/workdir/audit_math3/audit/labels"
+    if os.path.exists(local_fallback):
+        AUDIT_DIR = local_fallback
 
 def fix_2023_shanghai_16(conn):
     print(">>> [1/7] Rewriting GK-2023-shanghai-16 solution (Ellipse & Hyperbola rigorous proof)...")
@@ -194,11 +199,11 @@ def recalibrate_difficulties(conn):
     c.execute('''
         SELECT q.uid, q.paper_id, q.section, q.question_number, q.primary_category, q.body, q.score,
                p.total_questions, p.year,
-               sec_stat.min_q, sec_stat.max_q, sec_stat.sec_cnt
+               sec_stat.min_q, sec_stat.sec_cnt
         FROM questions q
         JOIN papers p ON q.paper_id = p.paper_id
         LEFT JOIN (
-            SELECT paper_id, section, min(question_number) as min_q, max(question_number) as max_q, count(*) as sec_cnt
+            SELECT paper_id, section, min(question_number) as min_q, count(*) as sec_cnt
             FROM questions
             GROUP BY paper_id, section
         ) sec_stat ON q.paper_id = sec_stat.paper_id AND q.section = sec_stat.section
@@ -207,7 +212,7 @@ def recalibrate_difficulties(conn):
     all_qs = c.fetchall()
 
     def evaluate_refined_difficulty(q):
-        uid, paper_id, sec, q_num, cat, body, score, tot_q, year, min_q, max_q, sec_cnt = q
+        uid, paper_id, sec, q_num, cat, body, score, tot_q, year, min_q, sec_cnt = q
         body_text = body or ''
         body_len = len(body_text)
 
@@ -254,7 +259,7 @@ def recalibrate_difficulties(conn):
                 # Standard national / new gaokao pattern (e.g. 3~6 fill-ins, e.g. Q13-16 or Q12-14)
                 if rel_idx <= 2:
                     return '基础' if not (has_deep_concept and body_len > 100) else '中档'
-                elif rel_idx == total_sec_fill - 1:
+                elif rel_idx < total_sec_fill:
                     return '基础' if (has_elementary_concept and not has_deep_concept) else '中档'
                 else:
                     # Last fill-in

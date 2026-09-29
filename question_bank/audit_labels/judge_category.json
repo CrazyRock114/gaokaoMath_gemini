@@ -1,0 +1,1202 @@
+{
+"GK-1977-beijing_science-11": [
+2,
+"函数与导数/立体几何",
+"求导+旋转体体积，与三角无关"
+],
+"GK-1977-jiangsu_zhenjiang_region-06": [
+0,
+"",
+"测塔高，解三角形应用"
+],
+"GK-1977-heilongjiang_preliminary-10": [
+0,
+"",
+"计算题含sin+指对幂，三角占半可接受"
+],
+"GK-1977-fujian_liberal-01": [
+1,
+"初等代数与传统几何",
+"4小题仅1小题涉三角，主为初等代数混合计算"
+],
+"GK-1977-shanghai_science-05": [
+0,
+"",
+"解不等式组"
+],
+"GK-1977-guangdong_hainan_included-09": [
+0,
+"",
+"印刷排版最值，均值不等式"
+],
+"GK-1977-hubei-06": [
+0,
+"",
+"求导数"
+],
+"GK-1977-jiangsu_lianyungang_city-03": [
+0,
+"",
+"求定义域"
+],
+"GK-1977-inner_mongolia_science-03": [
+1,
+"数列",
+"拖拉机增产=等差等比数列应用"
+],
+"GK-1977-xinjiang_liberal-01": [
+0,
+"",
+"解分式方程"
+],
+"GK-1977-beijing_liberal-03": [
+0,
+"",
+"解分式方程"
+],
+"GK-1977-shaanxi-03": [
+0,
+"",
+"绝对值化简"
+],
+"GK-1962-national-02": [
+0,
+"",
+"复数乘方实部"
+],
+"GK-1977-jiangxi-17": [
+2,
+"概率与统计",
+"组成四位数=排列组合"
+],
+"GK-1977-jiangsu_yancheng_region-05": [
+0,
+"",
+"双曲线顶点焦点求椭圆"
+],
+"GK-1977-hunan_zhuzhou_pilot-18": [
+0,
+"",
+"抛物线拱形面积"
+],
+"GK-1977-jilin-12": [
+0,
+"",
+"二次曲线标准方程"
+],
+"GK-1977-jiangsu_yangzhou_region-03": [
+0,
+"",
+"极直互化"
+],
+"GK-1958-hei_ji_liao-07": [
+0,
+"",
+"正方形面积和=等比数列"
+],
+"GK-1977-jiangsu_suzhou_region-18": [
+0,
+"",
+"被3除余1的两位数和=等差数列"
+],
+"GK-1958-hubei-06": [
+0,
+"",
+"(21/20)^100与100比较，二项式定理可归概率统计"
+],
+"GK-1977-jiangsu_suzhou_region-03": [
+2,
+"初等代数与传统几何",
+"多项式乘法计算，与概率统计无关"
+],
+"GK-1958-beijing-07": [
+0,
+"",
+"二面角距离"
+],
+"GK-1977-gansu-06": [
+0,
+"",
+"二视图识图求体积"
+],
+"GK-1977-shandong_a-01": [
+2,
+"初等代数与传统几何",
+"√((3-x)^2)化简，单一知识点却标综合题"
+],
+"GK-1977-jiangxi-01": [
+2,
+"函数与导数",
+"f(0)求值，单一知识点却标综合题"
+],
+"GK-1977-tibet-03": [
+2,
+"函数与导数",
+"对数运算，单一知识点却标综合题"
+],
+"GK-1977-jiangsu_nantong_region-08": [
+2,
+"数列",
+"被6整除自然数求和=等差数列，标综合题"
+],
+"GK-1957-national-05": [
+2,
+"立体几何与空间向量",
+"异面直线公垂线/平面等分线段证明，典型立体几何题错标集合"
+],
+"GK-1977-jiangsu_nantong_region-04": [
+2,
+"函数与导数",
+"判别式求k与根，与集合逻辑无关"
+],
+"GK-1985-national_liberal-12": [
+0,
+"",
+"三角恒等式证明"
+],
+"GK-1987-shanghai-07": [
+0,
+"",
+"arcsin求值"
+],
+"GK-1989-shanghai-08": [
+0,
+"",
+"半角求值"
+],
+"GK-1994-shanghai_science-17": [
+2,
+"集合与常用逻辑用语",
+"射影相等=充要条件判断(立体背景)，与三角无关"
+],
+"GK-1985-shanghai_science-01": [
+0,
+"",
+"绝对值不等式"
+],
+"GK-1987-guangdong_liberal-07": [
+2,
+"平面解析几何",
+"圆上到直线距离最小的点=直线与圆"
+],
+"GK-1985-shanghai_science-12": [
+2,
+"三角函数与解三角形",
+"反三角恒等式判断，明显属三角"
+],
+"GK-1988-guangdong_liberal-19": [
+2,
+"不等式",
+"同解不等式判断"
+],
+"GK-1992-shanghai-08": [
+0,
+"",
+"反函数定义域"
+],
+"GK-1994-shanghai_science-06": [
+0,
+"",
+"求反函数"
+],
+"GK-1986-national_science-11": [
+0,
+"",
+"指数方程求解，可归初等代数"
+],
+"GK-1993-national_liberal-15": [
+2,
+"概率与统计",
+"二项展开式有理系数个数=二项式定理"
+],
+"GK-1985-guangdong_liberal-03": [
+0,
+"",
+"复数三角形式"
+],
+"GK-1986-national_liberal-12": [
+0,
+"",
+"复数求值"
+],
+"GK-1989-national_science-07": [
+0,
+"",
+"复数方程"
+],
+"GK-1989-national_science-12": [
+2,
+"概率与统计",
+"组成偶数个数=排列组合"
+],
+"GK-1985-guangdong_liberal-13": [
+0,
+"",
+"垂直平分线方程"
+],
+"GK-1990-shanghai-11": [
+0,
+"",
+"圆的极坐标方程"
+],
+"GK-1990-guangdong_science-10": [
+1,
+"函数与导数",
+"二次函数单调区间，主为函数性质"
+],
+"GK-1992-national_science-28": [
+0,
+"",
+"椭圆垂直平分线证明"
+],
+"GK-1988-guangdong_liberal-01": [
+0,
+"",
+"等比数列"
+],
+"GK-1989-national_science-05": [
+0,
+"",
+"等比数列求和极限"
+],
+"GK-1989-guangdong_science-07": [
+0,
+"",
+"等比数列"
+],
+"GK-1991-national_liberal-08": [
+0,
+"",
+"等比数列"
+],
+"GK-1984-national_science-11": [
+0,
+"",
+"节目单排列"
+],
+"GK-1993-jing_xiang_e_yun_qiong_gui_liberal-17": [
+0,
+"",
+"错排计数"
+],
+"GK-1986-shanghai_science-17": [
+0,
+"",
+"正方体异面直线关系"
+],
+"GK-1987-shanghai-23": [
+2,
+"平面解析几何",
+"两直线平行求参数=直线方程，与立体几何无关"
+],
+"GK-1988-national_science-15": [
+0,
+"",
+"二面角射影判断"
+],
+"GK-1989-shanghai-19": [
+0,
+"",
+"旋转体体积比较"
+],
+"GK-1985-shanghai_liberal-09": [
+2,
+"函数与导数",
+"对数换底运算，标综合题"
+],
+"GK-1987-national_science-22": [
+2,
+"数列",
+"数列极限，标综合题"
+],
+"GK-1989-national_science-16": [
+2,
+"概率与统计",
+"二项式系数和，标综合题"
+],
+"GK-1991-national_liberal-10": [
+2,
+"概率与统计",
+"组合计数，标综合题"
+],
+"GK-1986-national_liberal-03": [
+0,
+"",
+"集合补集"
+],
+"GK-1989-shanghai-26": [
+1,
+"平面向量与复数",
+"复数集合图形/辐角/模，主考复数"
+],
+"GK-1991-national_science-11": [
+0,
+"",
+"命题充要关系"
+],
+"GK-1994-shanghai_science-20": [
+0,
+"",
+"归纳法命题推理，逻辑归宿合理"
+],
+"GK-1996-national_science-18": [
+0,
+"",
+"正切和积公式"
+],
+"GK-1999-shanghai_liberal-01": [
+0,
+"",
+"反三角求值"
+],
+"GK-2002-yue_yu_su_gui-04": [
+0,
+"",
+"sinx与cosx比较"
+],
+"GK-2003-yue_gui-11": [
+1,
+"平面解析几何",
+"反射对称问题，主为对称/直线的解析几何"
+],
+"GK-2001-syllabus_liberal-21": [
+0,
+"",
+"宣传画最值"
+],
+"GK-2001-jing_meng_wan_science_spring-10": [
+0,
+"",
+"3^a+3^b最值"
+],
+"GK-1996-national_liberal-02": [
+0,
+"",
+"指对函数图象"
+],
+"GK-1997-national_science-22": [
+0,
+"",
+"运输成本函数最值"
+],
+"GK-1998-shanghai_science-13": [
+0,
+"",
+"对数函数图象"
+],
+"GK-2001-syllabus_liberal-06": [
+0,
+"",
+"反函数"
+],
+"GK-1995-shanghai_liberal-30": [
+0,
+"",
+"二次函数+多项式+圆真综合，归宿可接受"
+],
+"GK-2003-jing_meng_wan_science_spring-10": [
+2,
+"平面解析几何",
+"直线与圆相切判三角形形状，主为直线与圆"
+],
+"GK-1995-shanghai_liberal-25": [
+0,
+"",
+"复数模与方程"
+],
+"GK-1999-shanghai_science-08": [
+0,
+"",
+"向量旋转"
+],
+"GK-2000-syllabus_liberal-02": [
+0,
+"",
+"复数向量旋转"
+],
+"GK-2000-syllabus_science-18": [
+1,
+"立体几何与空间向量",
+"平行六面体二面角=立体几何，向量法可辩护"
+],
+"GK-1995-shanghai_science-06": [
+2,
+"函数与导数",
+"y=ax+b与y=b^ax图象=指对函数图象"
+],
+"GK-1996-national_science-07": [
+0,
+"",
+"椭圆参数方程焦点"
+],
+"GK-1997-national_liberal-17": [
+0,
+"",
+"直线与抛物线中点"
+],
+"GK-2002-yue_yu_su_gui-20": [
+0,
+"",
+"双曲线中点弦"
+],
+"GK-1995-national_science-25": [
+0,
+"",
+"等比数列对数不等式"
+],
+"GK-1999-shanghai_science-10": [
+0,
+"",
+"等差数列Sn最值"
+],
+"GK-2002-beijing_liberal_autumn-19": [
+0,
+"",
+"递推数列不等式"
+],
+"GK-2002-shanghai_liberal-11": [
+0,
+"",
+"递推数列通项"
+],
+"GK-2001-new_curriculum_liberal-19": [
+0,
+"",
+"系统概率"
+],
+"GK-2002-new_curriculum_science-20": [
+0,
+"",
+"独立重复试验概率"
+],
+"GK-2003-liaoning-20": [
+0,
+"",
+"对抗赛概率"
+],
+"GK-1995-shanghai_liberal-28": [
+0,
+"",
+"四棱锥体积二面角"
+],
+"GK-1997-national_science-15": [
+1,
+"概率与统计",
+"四面体取点计数=组合计数，立体为背景"
+],
+"GK-2001-shanghai_spring-19": [
+0,
+"",
+"棱锥容器最值，立体归宿可接受"
+],
+"GK-2002-shanghai_science-04": [
+0,
+"",
+"正四棱锥二面角"
+],
+"GK-1997-national_science-14": [
+2,
+"不等式",
+"不等式组解集，标综合题"
+],
+"GK-2001-new_curriculum_liberal-12": [
+0,
+"",
+"网络信息量，无常规知识点归属，综合题可接受"
+],
+"GK-2003-jing_meng_wan_liberal_spring-01": [
+2,
+"不等式",
+"不等式性质判断，标综合题"
+],
+"GK-2003-jing_meng_wan_science_spring-16": [
+2,
+"函数与导数",
+"函数周期性，标综合题"
+],
+"GK-1996-national_science-05": [
+2,
+"立体几何与空间向量",
+"线面平行垂直关系判断，典型立体几何错标集合"
+],
+"GK-1997-shanghai_science-16": [
+1,
+"概率与统计",
+"集合元素作直线计数=组合计数"
+],
+"GK-1999-national_science-01": [
+0,
+"",
+"Venn图集合"
+],
+"GK-2000-jing_hui_liberal_spring-18": [
+2,
+"立体几何与空间向量",
+"空间线面位置命题判断，错标集合"
+],
+"GK-2008-syllabus_paper_1_liberal-06": [
+0,
+"",
+"三角式化简判断"
+],
+"GK-2008-anhui_liberal-17": [
+0,
+"",
+"三角函数周期值域"
+],
+"GK-2009-liaoning_science-22": [
+0,
+"",
+"圆内接三角形解三角形"
+],
+"GK-2010-tianjin_liberal-09": [
+0,
+"",
+"三角形中向量数量积，三角归宿可接受"
+],
+"GK-2006-tianjin_science-15": [
+0,
+"",
+"运费最值"
+],
+"GK-2006-chongqing_liberal-16": [
+0,
+"",
+"线性规划"
+],
+"GK-2008-shanghai_science-01": [
+0,
+"",
+"绝对值不等式"
+],
+"GK-2010-sichuan_science-07": [
+0,
+"",
+"线性规划应用"
+],
+"GK-2006-hubei_liberal-19": [
+0,
+"",
+"导数极值单调性"
+],
+"GK-2007-hunan_liberal-21": [
+0,
+"",
+"导数极值切线"
+],
+"GK-2007-fujian_liberal-07": [
+0,
+"",
+"减函数求范围"
+],
+"GK-2008-hubei_science-07": [
+0,
+"",
+"对数函数减性求参"
+],
+"GK-2004-anhui_science_spring-16": [
+2,
+"概率与统计",
+"二项式定理常数项"
+],
+"GK-2006-zhejiang_science-08": [
+1,
+"概率与统计",
+"展开式系数a9，二项式为主"
+],
+"GK-2006-liaoning_science-18": [
+1,
+"立体几何与空间向量",
+"正方形折叠二面角=立体几何"
+],
+"GK-2007-zhejiang_science-07": [
+0,
+"",
+"向量模与夹角"
+],
+"GK-2007-shaanxi_science-15": [
+0,
+"",
+"向量夹角"
+],
+"GK-2010-zhejiang_science-16": [
+0,
+"",
+"向量夹角范围"
+],
+"GK-2004-anhui_science_spring-19": [
+0,
+"",
+"距离和轨迹"
+],
+"GK-2006-anhui_liberal-22": [
+0,
+"",
+"双曲线离心率"
+],
+"GK-2009-anhui_science-12": [
+0,
+"",
+"极坐标参数方程选考，解析归宿合理"
+],
+"GK-2010-zhejiang_liberal-22": [
+0,
+"",
+"抛物线焦点直线"
+],
+"GK-2006-shanghai_science-21": [
+0,
+"",
+"递推数列等比证明"
+],
+"GK-2007-fujian_science-02": [
+0,
+"",
+"裂项求和"
+],
+"GK-2008-shaanxi_science-22": [
+0,
+"",
+"递推数列通项不等式"
+],
+"GK-2009-beijing_science-14": [
+0,
+"",
+"数列周期"
+],
+"GK-2006-sichuan_liberal-05": [
+0,
+"",
+"分层抽样"
+],
+"GK-2006-shanghai_science-09": [
+0,
+"",
+"排列求概率"
+],
+"GK-2006-hunan_liberal-06": [
+0,
+"",
+"不相邻排列"
+],
+"GK-2009-sichuan_science-11": [
+0,
+"",
+"站队排列"
+],
+"GK-2005-national_paper_3_science-18": [
+0,
+"",
+"四棱锥二面角"
+],
+"GK-2009-jiangsu-08": [
+0,
+"",
+"类比体积比"
+],
+"GK-2010-anhui_liberal-19": [
+0,
+"",
+"多面体证明与体积"
+],
+"GK-2010-liaoning_liberal-16": [
+0,
+"",
+"三视图棱长(子标签错标异面直线)"
+],
+"GK-2007-shandong_liberal-16": [
+2,
+"平面解析几何",
+"与直线及曲线都相切的圆，标综合题"
+],
+"GK-2008-sichuan_ordinary_science-13": [
+2,
+"概率与统计",
+"二项式x^2系数，标综合题"
+],
+"GK-2009-sichuan_science-13": [
+2,
+"概率与统计",
+"二项式常数项，标综合题"
+],
+"GK-2010-hunan_liberal-12": [
+"GAP",
+"算法与程序框图",
+"程序框图，分类体系无算法类"
+],
+"GK-2004-beijing_liberal_autumn-01": [
+0,
+"",
+"集合交集"
+],
+"GK-2008-hubei_liberal-05": [
+1,
+"不等式",
+"不等式组区域判断=线性规划"
+],
+"GK-2009-jiangxi_science-16": [
+2,
+"平面解析几何",
+"直线系与圆的命题判断，主为直线与圆"
+],
+"GK-2010-anhui_science-11": [
+0,
+"",
+"全称命题否定"
+],
+"GK-2012-shanghai_liberal-17": [
+0,
+"",
+"三角形形状判断"
+],
+"GK-2014-jiangsu-15": [
+0,
+"",
+"三角求值"
+],
+"GK-2016-sichuan_science-11": [
+0,
+"",
+"二倍角"
+],
+"GK-2017-beijing_science-15": [
+0,
+"",
+"正弦定理面积"
+],
+"GK-2012-fujian_science-23": [
+0,
+"",
+"绝对值不等式选考"
+],
+"GK-2015-guangdong_science-06": [
+0,
+"",
+"线性规划"
+],
+"GK-2015-national_paper_2_liberal-14": [
+0,
+"",
+"线性规划"
+],
+"GK-2016-shanghai_liberal-01": [
+0,
+"",
+"绝对值不等式"
+],
+"GK-2012-shanghai_spring-02": [
+0,
+"",
+"定义域"
+],
+"GK-2014-shanghai_liberal-11": [
+0,
+"",
+"幂函数求范围"
+],
+"GK-2016-shandong_liberal-10": [
+0,
+"",
+"切线垂直性质"
+],
+"GK-2016-sichuan_liberal-14": [
+0,
+"",
+"周期奇函数求值"
+],
+"GK-2011-liaoning_science-22": [
+0,
+"",
+"几何证明选考，传统几何归宿合理"
+],
+"GK-2016-sichuan_science-06": [
+"GAP",
+"算法与程序框图",
+"秦九韶算法程序框图，无算法类"
+],
+"GK-2011-hunan_liberal-02": [
+0,
+"",
+"复数相等"
+],
+"GK-2012-jiangsu-03": [
+0,
+"",
+"复数除法"
+],
+"GK-2014-chongqing_liberal-12": [
+0,
+"",
+"向量数量积"
+],
+"GK-2015-zhejiang_science-13": [
+1,
+"立体几何与空间向量",
+"三棱锥异面直线成角，主为立体几何"
+],
+"GK-2011-chongqing_liberal-09": [
+0,
+"",
+"双曲线离心率"
+],
+"GK-2011-hubei_liberal-14": [
+0,
+"",
+"直线截圆弦长"
+],
+"GK-2013-anhui_science-18": [
+0,
+"",
+"椭圆方程定点"
+],
+"GK-2014-liaoning_liberal-23": [
+0,
+"",
+"极坐标参数方程选考"
+],
+"GK-2013-zhejiang_science-18": [
+0,
+"",
+"等差数列绝对值求和"
+],
+"GK-2014-chongqing_liberal-02": [
+0,
+"",
+"等差数列"
+],
+"GK-2015-shaanxi_science-13": [
+0,
+"",
+"等差中位数"
+],
+"GK-2016-national_paper_1_science-15": [
+0,
+"",
+"等比数列积最值"
+],
+"GK-2012-shandong_liberal-14": [
+0,
+"",
+"频率分布直方图"
+],
+"GK-2013-syllabus_liberal-20": [
+0,
+"",
+"练习赛概率"
+],
+"GK-2014-shanghai_liberal-05": [
+0,
+"",
+"分层抽样"
+],
+"GK-2015-national_paper_2_science-18": [
+0,
+"",
+"满意度统计"
+],
+"GK-2013-new_curriculum_paper_2_liberal-09": [
+0,
+"",
+"四面体三视图"
+],
+"GK-2013-chongqing_liberal-20": [
+0,
+"",
+"圆柱蓄水池最值，立体归宿可接受"
+],
+"GK-2014-zhejiang_liberal-20": [
+0,
+"",
+"四棱锥线面角"
+],
+"GK-2015-national_paper_2_liberal-10": [
+0,
+"",
+"球与三棱锥体积"
+],
+"GK-2012-syllabus_liberal-13": [
+2,
+"概率与统计",
+"二项式系数，标综合题"
+],
+"GK-2013-shanghai_liberal-01": [
+2,
+"不等式",
+"分式不等式解集，标综合题"
+],
+"GK-2014-liaoning_science-13": [
+"GAP",
+"算法与程序框图",
+"程序框图，无算法类"
+],
+"GK-2015-shanghai_liberal-21": [
+2,
+"函数与导数",
+"警员距离分段函数应用，标综合题"
+],
+"GK-2011-fujian_science-02": [
+0,
+"",
+"充要条件"
+],
+"GK-2012-hubei_science-02": [
+0,
+"",
+"存在命题否定"
+],
+"GK-2013-shandong_liberal-16": [
+0,
+"",
+"新定义命题判断，逻辑归宿可接受"
+],
+"GK-2015-national_paper_2_liberal-01": [
+0,
+"",
+"集合并集"
+],
+"GK-2018-zhejiang-05": [
+1,
+"函数与导数",
+"2^|x|sin2x图象，主为函数图象性质"
+],
+"GK-2019-national_paper_1_liberal-07": [
+0,
+"",
+"tan255°"
+],
+"GK-2022-national_paper_a_science-12": [
+0,
+"",
+"比大小含三角函数值，三角归宿可接受"
+],
+"GK-2023-new_gaokao_paper_1-06": [
+1,
+"平面解析几何",
+"过点与圆相切的直线夹角=直线与圆"
+],
+"GK-2025-beijing-13": [
+0,
+"",
+"三角方程组开放题"
+],
+"GK-2019-national_paper_1_liberal-23": [
+0,
+"",
+"不等式证明选考"
+],
+"GK-2020-shanghai-05": [
+0,
+"",
+"线性规划"
+],
+"GK-2018-tianjin_science-04": [
+1,
+"集合与常用逻辑用语",
+"|x-1/2|<1/2与x^3<1条件关系=充要条件"
+],
+"GK-2020-national_paper_1_science-21": [
+0,
+"",
+"e^x+ax^2-x导数"
+],
+"GK-2022-shanghai-12": [
+0,
+"",
+"f(x)=f(1/(x+1))"
+],
+"GK-2024-new_gaokao_paper_2-11": [
+0,
+"",
+"三次函数多选"
+],
+"GK-2025-tianjin-03": [
+0,
+"",
+"图象识解析式"
+],
+"GK-2021-zhejiang-11": [
+0,
+"",
+"弦图面积比，传统几何归宿可接受"
+],
+"GK-2022-zhejiang-12": [
+0,
+"",
+"多项式系数"
+],
+"GK-2018-beijing_liberal-09": [
+0,
+"",
+"向量垂直求参"
+],
+"GK-2021-zhejiang-17": [
+0,
+"",
+"向量投影范围"
+],
+"GK-2023-new_gaokao_paper_1-03": [
+0,
+"",
+"向量垂直"
+],
+"GK-2025-national_paper_2-12": [
+0,
+"",
+"向量垂直求模"
+],
+"GK-2025-national_paper_1-06": [
+0,
+"",
+"帆船风速向量应用"
+],
+"GK-2018-national_paper_2_science-05": [
+0,
+"",
+"双曲线渐近线"
+],
+"GK-2018-jiangsu-12": [
+0,
+"",
+"圆与向量"
+],
+"GK-2021-zhejiang-16": [
+0,
+"",
+"椭圆与圆"
+],
+"GK-2023-beijing-12": [
+0,
+"",
+"双曲线方程"
+],
+"GK-2026-national_paper_2-04": [
+0,
+"",
+"双曲线渐近线"
+],
+"GK-2018-jiangsu-20": [
+0,
+"",
+"等差等比综合"
+],
+"GK-2019-national_paper_1_science-21": [
+2,
+"概率与统计",
+"药物试验马尔可夫递推概率，典型概率题错标数列"
+],
+"GK-2021-zhejiang-20": [
+0,
+"",
+"数列通项恒成立"
+],
+"GK-2022-shanghai_spring-16": [
+0,
+"",
+"等比数列判断"
+],
+"GK-2024-national_paper_a_liberal-17": [
+0,
+"",
+"等比数列"
+],
+"GK-2020-beijing-18": [
+0,
+"",
+"独立性检验"
+],
+"GK-2021-national_paper_b_liberal-07": [
+0,
+"",
+"几何概型"
+],
+"GK-2022-national_paper_a_liberal-06": [
+0,
+"",
+"古典概型"
+],
+"GK-2022-beijing-18": [
+0,
+"",
+"频率概率预测"
+],
+"GK-2024-national_paper_a_liberal-04": [
+0,
+"",
+"古典概型"
+],
+"GK-2018-national_paper_2_science-16": [
+0,
+"",
+"圆锥侧面积"
+],
+"GK-2019-jiangsu-16": [
+0,
+"",
+"棱柱证明"
+],
+"GK-2019-zhejiang-08": [
+0,
+"",
+"三棱锥三角比较"
+],
+"GK-2021-new_gaokao_paper_1-12": [
+0,
+"",
+"正三棱柱向量点"
+],
+"GK-2022-new_gaokao_paper_2-20": [
+0,
+"",
+"三棱锥二面角"
+],
+"GK-2020-national_paper_1_science-14": [
+2,
+"平面向量与复数",
+"单位向量|a+b|=1求|a-b|，2020年仍标综合题"
+],
+"GK-2021-national_paper_a_liberal-06": [
+2,
+"函数与导数",
+"视力L=5+lgV对数换算，标综合题"
+],
+"GK-2021-shanghai_spring-07": [
+2,
+"概率与统计",
+"二项式系数最大，标综合题"
+],
+"GK-2022-zhejiang-05": [
+2,
+"立体几何与空间向量",
+"三视图求体积，标综合题"
+],
+"GK-2023-national_paper_b_liberal-06": [
+2,
+"平面向量与复数",
+"正方形向量数量积，标综合题"
+],
+"GK-2018-beijing_science-08": [
+0,
+"",
+"集合语言线性规划，集合归宿可接受"
+],
+"GK-2019-national_paper_3_science-01": [
+0,
+"",
+"集合交集"
+],
+"GK-2021-national_paper_b_liberal-01": [
+0,
+"",
+"补集"
+],
+"GK-2023-new_gaokao_paper_2-02": [
+0,
+"",
+"集合包含求参"
+],
+"GK-2023-national_paper_a_science-06": [
+2,
+"概率与统计",
+"滑冰滑雪条件概率，错标集合与常用逻辑用语"
+]
+}
