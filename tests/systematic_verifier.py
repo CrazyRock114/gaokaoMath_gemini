@@ -209,7 +209,7 @@ class SystematicVerifier:
         # 3.6 Categories cross-lock
         cat_match = True
         all_categories = set(db_categories) | set(json_categories)
-        for cat in sorted(all_categories):
+        for cat in sorted(all_categories, key=str):
             db_cnt = db_categories.get(cat)
             json_cnt = json_categories.get(cat)
             if db_cnt != json_cnt:
