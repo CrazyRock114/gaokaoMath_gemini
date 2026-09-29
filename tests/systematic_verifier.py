@@ -209,7 +209,7 @@ class SystematicVerifier:
         # 3.6 Categories cross-lock
         cat_match = True
         all_categories = set(db_categories) | set(json_categories)
-        for cat in all_categories:
+        for cat in sorted(all_categories):
             db_cnt = db_categories.get(cat)
             json_cnt = json_categories.get(cat)
             if db_cnt != json_cnt:
@@ -687,10 +687,14 @@ class SystematicVerifier:
             prev_hash = prev.get("hash")
             prev_status = prev.get("status")
 
-            if (prev_hash and prev_hash != h) or prev_status == "NEEDS_REVIEW":
+            if prev_hash and prev_hash != h:
+                status = "NEEDS_REVIEW"
+                self.add_finding("L7", "High", f"审定注记内容指纹漂移: {uid}",
+                                 f"哈希由 {prev_hash} 变为 {h}，需人工重新签核")
+            elif prev_status == "NEEDS_REVIEW":
                 status = "NEEDS_REVIEW"
                 self.add_finding("L7", "High", f"审定注记内容需人工签核: {uid}",
-                                 f"哈希由 {prev_hash} 变为 {h}，需人工重新签核")
+                                 f"内容指纹未变化 ({h})，但上次审定状态仍为 NEEDS_REVIEW，需人工完成签核")
             else:
                 status = prev.get("status", "APPROVED")
                 self.log_pass(1)
