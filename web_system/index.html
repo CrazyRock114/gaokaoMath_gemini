@@ -15,6 +15,80 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Embedded print styles for high-fidelity examination paper printing */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 15mm 15mm 15mm 15mm;
+      }
+      html, body {
+        height: auto !important;
+        overflow: visible !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt !important;
+        line-height: 1.6 !important;
+      }
+      header, footer, nav, button, input, select, .no-print, #basket-drawer, #question-modal, #filter-drawer, .tab-btn, .sticky, #toast-container {
+        display: none !important;
+      }
+      main {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      body.printing-modal #full-paper-modal,
+      body:has(#full-paper-modal:not(.hidden)) #full-paper-modal {
+        position: static !important;
+        display: block !important;
+        background: transparent !important;
+        overflow: visible !important;
+        max-height: none !important;
+        z-index: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      body.printing-modal #full-paper-modal .sticky,
+      body:has(#full-paper-modal:not(.hidden)) #full-paper-modal .sticky {
+        display: none !important;
+      }
+      body.printing-modal main,
+      body:has(#full-paper-modal:not(.hidden)) main {
+        display: none !important;
+      }
+      body.printing-modal #reader-paper-content,
+      body:has(#full-paper-modal:not(.hidden)) #reader-paper-content {
+        max-height: none !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+      }
+      .printable-paper {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+      }
+      .exam-problem-item {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        margin-bottom: 1.5rem !important;
+        border-bottom: 1px dashed #cbd5e1 !important;
+        padding-bottom: 1rem !important;
+      }
+      .student-answer-blank {
+        display: block !important;
+        height: 120px !important;
+        border: 1px solid #94a3b8 !important;
+        margin-top: 10px !important;
+        background: #fff !important;
+      }
+    }
+  </style>
   <script>
     tailwind.config = {
       theme: {
@@ -193,6 +267,12 @@
           <button onclick="setPaperDecadeQuick(1985, 1999)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px]">标准化改革 (1985-1999)</button>
           <button onclick="setPaperDecadeQuick(1977, 1984)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px]">恢复高考初期 (1977-1984)</button>
           <button onclick="setPaperDecadeQuick(1952, 1965)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px]">建国探索期 (1952-1965)</button>
+        </div>
+
+        <!-- Archive Historical Notes Banner -->
+        <div class="flex items-start sm:items-center gap-2 text-[11px] text-slate-500 bg-slate-50 border border-slate-200/80 px-3.5 py-2 rounded-xl mt-2">
+          <i data-lucide="info" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0"></i>
+          <span><strong>【文献收录说明】</strong>全库严格考证收录 1952-2026 年共 775 套高考真题卷。其中上海春考（27套）明确标明为民间考场回忆版；2003年天津卷忠实标注采用教育部考试中心全国新课程卷（七省市共用）；1994年全国科目组改革过渡期旧科目组卷正持续文献核补中。</span>
         </div>
       </div>
 

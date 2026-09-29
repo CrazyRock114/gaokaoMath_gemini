@@ -62,15 +62,21 @@
 
 /* Print Styles for Exam Paper */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm 15mm 15mm 15mm;
+  }
+
   html, body {
     height: auto !important;
     overflow: visible !important;
     background: #ffffff !important;
     color: #000000 !important;
-    font-size: 11pt;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
   }
 
-  header, footer, nav, button, input, select, .no-print, #basket-drawer, #question-modal, .tab-btn {
+  header, footer, nav, button, input, select, .no-print, #basket-drawer, #question-modal, #filter-drawer, .tab-btn, .sticky, #toast-container {
     display: none !important;
   }
 
@@ -81,9 +87,7 @@
   }
 
   /* Full paper modal printing support */
-  body:has(#full-paper-modal:not(.hidden)) main {
-    display: none !important;
-  }
+  body.printing-modal #full-paper-modal,
   body:has(#full-paper-modal:not(.hidden)) #full-paper-modal {
     position: static !important;
     display: block !important;
@@ -94,9 +98,15 @@
     padding: 0 !important;
     margin: 0 !important;
   }
+  body.printing-modal #full-paper-modal .sticky,
   body:has(#full-paper-modal:not(.hidden)) #full-paper-modal .sticky {
     display: none !important;
   }
+  body.printing-modal main,
+  body:has(#full-paper-modal:not(.hidden)) main {
+    display: none !important;
+  }
+  body.printing-modal #reader-paper-content,
   body:has(#full-paper-modal:not(.hidden)) #reader-paper-content {
     max-height: none !important;
     overflow: visible !important;

@@ -1874,12 +1874,14 @@ function renderPaperCards(papers) {
             <span class="text-slate-400 text-[11px] font-mono">共 ${p.total_questions} 题 · 满分 ${p.total_score || 150}分</span>
           </div>
 
-          <h3 class="font-black text-slate-900 text-base group-hover:text-blue-600 transition-colors line-clamp-1">
-            ${p.paper_name}
+          <h3 class="font-black text-slate-900 text-base group-hover:text-blue-600 transition-colors line-clamp-1 flex items-center gap-1.5">
+            <span>${p.paper_name}</span>
+            ${(p.paper_name.includes('回忆版') || (p.paper_type && p.paper_type.includes('回忆版'))) ? '<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-amber-300 flex-shrink-0">回忆版</span>' : ''}
+            ${p.paper_name.includes('全国新课程卷') ? '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-blue-300 flex-shrink-0">七省共用</span>' : ''}
           </h3>
 
           <p class="text-xs text-slate-500 line-clamp-1">
-            ${p.paper_type} · 题图全解齐备
+            ${p.paper_type} · ${(p.paper_name.includes('回忆版') || (p.paper_type && p.paper_type.includes('回忆版'))) ? '民间考场回忆版审校' : '75年权威真题文献'}
           </p>
         </div>
 
@@ -1913,11 +1915,11 @@ async function openFullPaper(paper_id) {
     state.currentReaderPaper = data;
     state.readerMode = 'teacher';
 
-        let noteHtml = '';
+    let noteHtml = '';
     if (data.paper.province && data.paper.province.includes('上海') && (data.paper.paper_name.includes('春') || (data.paper.paper_id && data.paper.paper_id.includes('spring')))) {
-      noteHtml = '<div class="mt-2 text-xs text-amber-200/90 bg-amber-950/60 border border-amber-500/40 rounded-lg px-3 py-1.5 font-sans">【编者注】上海春季高考部分年份试题源自考后名校回忆整理版，解析经教研团队独立推导验算核对。</div>';
+      noteHtml = '<div class="mt-2 text-xs text-amber-200/90 bg-amber-950/60 border border-amber-500/40 rounded-lg px-3 py-1.5 font-sans">【编者注】本卷为上海春季高考民间教研回忆版真题（官方不对外公布标准试卷），试题与解析已按学界公认版本严格审校核定。</div>';
     } else if (data.paper.year === 2003 && (data.paper.province.includes('天津') || (data.paper.paper_id && data.paper.paper_id.includes('tianjin')))) {
-      noteHtml = '<div class="mt-2 text-xs text-blue-200/90 bg-blue-950/60 border border-blue-500/40 rounded-lg px-3 py-1.5 font-sans">【编者注】2003年天津市高考数学采用全国统一卷，试卷结构与试题完全一致，收录以保留地方命题演变完整脉络。</div>';
+      noteHtml = '<div class="mt-2 text-xs text-blue-200/90 bg-blue-950/60 border border-blue-500/40 rounded-lg px-3 py-1.5 font-sans">【编者注】2003年天津市高考数学实为教育部考试中心命制之全国新课程卷（津晋赣鲁皖黑青七省市共用）。第2题与第4题内容相同系当年试卷印刷真实排版缺陷，本站忠实保留历史原貌。</div>';
     }
 
     document.getElementById('reader-paper-title').textContent = data.paper.paper_name;
@@ -1943,7 +1945,7 @@ function toggleReaderMode() {
   if (label) {
     label.textContent = (state.readerMode === 'teacher') 
       ? '切换学生模考版 (无答案)' 
-      : '切换教师解析版 (含全解)';
+      : '切换教师解析版 (含参考答案与解析)';
   }
   renderReaderPaperContent();
 }
@@ -2111,8 +2113,16 @@ async function addEntirePaperToBasket(paper_id) {
 }
 
 function printReaderPaper() {
+  document.body.classList.add('printing-modal');
   window.print();
+  setTimeout(() => {
+    document.body.classList.remove('printing-modal');
+  }, 1000);
 }
+
+window.addEventListener('afterprint', () => {
+  document.body.classList.remove('printing-modal');
+});
 
 function exportReaderPaperLatex() {
   if (!state.currentReaderPaper) return;

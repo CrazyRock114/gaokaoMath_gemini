@@ -371,6 +371,7 @@ class GaokaoMathHandler(SimpleHTTPRequestHandler):
             has_image = query.get("has_image", [""])[0]
             keyword = query.get("keyword", [""])[0]
             paper_id = query.get("paper_id", [""])[0]
+            uid = query.get("uid", [""])[0]
             limit = min(int(query.get("limit", [20])[0]), 100)
             offset = int(query.get("offset", [0])[0])
 
@@ -380,30 +381,34 @@ class GaokaoMathHandler(SimpleHTTPRequestHandler):
             conditions = ["year >= ?", "year <= ?"]
             params = [year_min, year_max]
 
-            if province and province != "全部":
-                conditions.append("province = ?")
-                params.append(province)
-            if track and track != "全部":
-                conditions.append("track = ?")
-                params.append(track)
-            if section and section != "全部":
-                conditions.append("section LIKE ?")
-                params.append(f"%{section}%")
-            if category and category != "全部":
-                conditions.append("primary_category = ?")
-                params.append(category)
-            if difficulty and difficulty != "全部":
-                conditions.append("difficulty = ?")
-                params.append(difficulty)
-            if has_image == "1":
-                conditions.append("has_image = 1")
-            if paper_id:
-                conditions.append("paper_id = ?")
-                params.append(paper_id)
-            if keyword:
-                conditions.append("(body LIKE ? OR answer LIKE ? OR solution LIKE ? OR subtags_json LIKE ? OR paper_name LIKE ?)")
-                kw_pat = f"%{keyword}%"
-                params.extend([kw_pat, kw_pat, kw_pat, kw_pat, kw_pat])
+            if uid:
+                conditions = ["uid = ?"]
+                params = [uid]
+            else:
+                if province and province != "全部":
+                    conditions.append("province = ?")
+                    params.append(province)
+                if track and track != "全部":
+                    conditions.append("track = ?")
+                    params.append(track)
+                if section and section != "全部":
+                    conditions.append("section LIKE ?")
+                    params.append(f"%{section}%")
+                if category and category != "全部":
+                    conditions.append("primary_category = ?")
+                    params.append(category)
+                if difficulty and difficulty != "全部":
+                    conditions.append("difficulty = ?")
+                    params.append(difficulty)
+                if has_image == "1":
+                    conditions.append("has_image = 1")
+                if paper_id:
+                    conditions.append("paper_id = ?")
+                    params.append(paper_id)
+                if keyword:
+                    conditions.append("(body LIKE ? OR answer LIKE ? OR solution LIKE ? OR subtags_json LIKE ? OR paper_name LIKE ?)")
+                    kw_pat = f"%{keyword}%"
+                    params.extend([kw_pat, kw_pat, kw_pat, kw_pat, kw_pat])
 
             where_clause = " WHERE " + " AND ".join(conditions)
 
