@@ -21,7 +21,7 @@ from collections import Counter
 
 WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(WORKSPACE, "question_bank", "gaokao_math.db")
-AUDIT_DIR = "/Users/crazyrock/ZCodeProject/gaokaomath/workdir/audit_math3/audit/labels"
+AUDIT_DIR = os.environ.get("AUDIT_DIR", "/Users/crazyrock/ZCodeProject/gaokaomath/workdir/audit_math3/audit/labels")
 
 def fix_2023_shanghai_16(conn):
     print(">>> [1/7] Rewriting GK-2023-shanghai-16 solution (Ellipse & Hyperbola rigorous proof)...")
@@ -110,12 +110,16 @@ def fix_judge_categories(conn):
     }
 
     jcat_path = os.path.join(AUDIT_DIR, "judge_category.json")
+    if not os.path.exists(jcat_path):
+        print(f"    [WARN] Audit file not found: {jcat_path}, skipping category judge fixes.")
+        return
+
     with open(jcat_path, "r", encoding="utf-8") as f:
         jcat = json.load(f)
 
     updated_count = 0
     for uid, info in jcat.items():
-        code, suggest, reason = info[0], info[1], info[2]
+        code, suggest = info[0], info[1]
         if code != 0:
             target_cat = cat_map.get(suggest, suggest)
             if target_cat:
@@ -125,12 +129,6 @@ def fix_judge_categories(conn):
                     c.execute("UPDATE questions SET primary_category = ? WHERE uid = ?", (target_cat, uid))
                 updated_count += 1
 
-    # Explicitly ensure the 4 highlighted questions are updated
-    c.execute("UPDATE questions SET primary_category = '立体几何与空间向量', subtags_json = '[\"空间线面位置关系证明\"]' WHERE uid = 'GK-1957-national-05'")
-    c.execute("UPDATE questions SET primary_category = '函数与导数', subtags_json = '[\"导数的运算与几何意义\"]' WHERE uid = 'GK-1977-beijing_science-11'")
-    c.execute("UPDATE questions SET primary_category = '概率与统计', subtags_json = '[\"排列与组合综合计数\"]' WHERE uid = 'GK-1977-jiangxi-17'")
-    c.execute("UPDATE questions SET primary_category = '不等式', subtags_json = '[\"分式不等式与同解变形\"]' WHERE uid = 'GK-1988-guangdong_liberal-19'")
-
     conn.commit()
     print(f"    {updated_count} questions updated from judge_category.json.")
 
@@ -139,6 +137,10 @@ def fix_judge_zonghe(conn):
     c = conn.cursor()
 
     jzonghe_path = os.path.join(AUDIT_DIR, "judge_zonghe.json")
+    if not os.path.exists(jzonghe_path):
+        print(f"    [WARN] Audit file not found: {jzonghe_path}, skipping zonghe fixes.")
+        return
+
     with open(jzonghe_path, "r", encoding="utf-8") as f:
         jzonghe = json.load(f)
 
@@ -191,15 +193,21 @@ def recalibrate_difficulties(conn):
 
     c.execute('''
         SELECT q.uid, q.paper_id, q.section, q.question_number, q.primary_category, q.body, q.score,
-               p.total_questions, p.year
+               p.total_questions, p.year,
+               sec_stat.min_q, sec_stat.max_q, sec_stat.sec_cnt
         FROM questions q
         JOIN papers p ON q.paper_id = p.paper_id
+        LEFT JOIN (
+            SELECT paper_id, section, min(question_number) as min_q, max(question_number) as max_q, count(*) as sec_cnt
+            FROM questions
+            GROUP BY paper_id, section
+        ) sec_stat ON q.paper_id = sec_stat.paper_id AND q.section = sec_stat.section
         ORDER BY q.paper_id, q.question_number
     ''')
     all_qs = c.fetchall()
 
     def evaluate_refined_difficulty(q):
-        uid, paper_id, sec, q_num, cat, body, score, tot_q, year = q
+        uid, paper_id, sec, q_num, cat, body, score, tot_q, year, min_q, max_q, sec_cnt = q
         body_text = body or ''
         body_len = len(body_text)
 
@@ -239,24 +247,30 @@ def recalibrate_difficulties(conn):
 
         # 3. Fill-in-the-blank
         elif '填空' in sec:
-            if q_num in [13, 14]:
-                return '基础'
-            elif q_num == 15:
-                return '基础' if (has_elementary_concept and not has_deep_concept) else '中档'
-            elif q_num >= 16:
-                # Last fill-in question in 4-question section
-                if (has_elementary_concept and not has_deep_concept) or body_len < 65 or '二项' in body_text:
-                    return '中档'
-                return '压轴'
-            else:
-                # Historical or Shanghai fill-ins (1~14)
-                if q_num <= 8:
-                    return '基础'
-                elif q_num <= 12:
-                    return '中档'
-                elif q_num <= 13:
-                    return '中档' if (has_elementary_concept or body_len < 60) else '压轴'
+            total_sec_fill = sec_cnt or 4
+            rel_idx = (q_num - (min_q or 1)) + 1
+
+            if total_sec_fill <= 6:
+                # Standard national / new gaokao pattern (e.g. 3~6 fill-ins, e.g. Q13-16 or Q12-14)
+                if rel_idx <= 2:
+                    return '基础' if not (has_deep_concept and body_len > 100) else '中档'
+                elif rel_idx == total_sec_fill - 1:
+                    return '基础' if (has_elementary_concept and not has_deep_concept) else '中档'
                 else:
+                    # Last fill-in
+                    if (has_elementary_concept and not has_deep_concept) or body_len < 65 or '二项' in body_text:
+                        return '中档'
+                    return '压轴'
+            else:
+                # Long fill-in section (e.g. Shanghai / Jiangsu / Historical with 10~20 fill-ins)
+                first_cutoff = int(total_sec_fill * 0.55)
+                mid_cutoff = int(total_sec_fill * 0.85)
+                if rel_idx <= first_cutoff:
+                    return '基础'
+                elif rel_idx <= mid_cutoff:
+                    return '中档'
+                else:
+                    # Final fill-ins (e.g. Q13, Q14 in Shanghai)
                     return '中档' if (has_elementary_concept and body_len < 50) else '压轴'
 
         # 4. Free response / Comprehensive
@@ -392,36 +406,44 @@ def update_analysis_json(conn):
 
     # Core Pillars with verified real statistics
     # Order: 函数与导数, 平面解析几何, 三角函数与解三角形, 立体几何与空间向量, 概率与统计, 数列
+    fn_avg = round(new_cat_totals["函数与导数"] / new_paper_cnt, 1)
+    geom_avg = round(new_cat_totals["平面解析几何"] / new_paper_cnt, 1)
+    tri_avg = round(new_cat_totals["三角函数与解三角形"] / new_paper_cnt, 1)
+    tri_hist = round(all_cat_totals["三角函数与解三角形"] / all_paper_cnt, 1)
+    sol_avg = round(new_cat_totals["立体几何与空间向量"] / new_paper_cnt, 1)
+    prob_avg = round(new_cat_totals["概率与统计"] / new_paper_cnt, 1)
+    seq_avg = round(new_cat_totals["数列"] / new_paper_cnt, 1)
+
     real_pillar_scores = {
         "函数与导数": {
-            "avg_score": round(new_cat_totals["函数与导数"] / new_paper_cnt, 1),
+            "avg_score": fn_avg,
             "historical_avg": round(all_cat_totals["函数与导数"] / all_paper_cnt, 1),
-            "frequency": "年年必考 (1客观题 + 1大题压轴，新高考均分 25.1分)"
+            "frequency": f"年年必考 (1客观题 + 1大题压轴，新高考均分 {fn_avg}分)"
         },
         "平面解析几何": {
-            "avg_score": round(new_cat_totals["平面解析几何"] / new_paper_cnt, 1),
+            "avg_score": geom_avg,
             "historical_avg": round(all_cat_totals["平面解析几何"] / all_paper_cnt, 1),
-            "frequency": "年年必考 (1~2客观题 + 1大题压轴，新高考均分 24.6分)"
+            "frequency": f"年年必考 (1~2客观题 + 1大题压轴，新高考均分 {geom_avg}分)"
         },
         "三角函数与解三角形": {
-            "avg_score": round(new_cat_totals["三角函数与解三角形"] / new_paper_cnt, 1),
-            "historical_avg": round(all_cat_totals["三角函数与解三角形"] / all_paper_cnt, 1),
-            "frequency": "年年必考 (1~2客观题 + 1解答题，新高考均分 21.9分，全库历史 25.3分)"
+            "avg_score": tri_avg,
+            "historical_avg": tri_hist,
+            "frequency": f"年年必考 (1~2客观题 + 1解答题，新高考均分 {tri_avg}分，全库历史 {tri_hist}分)"
         },
         "立体几何与空间向量": {
-            "avg_score": round(new_cat_totals["立体几何与空间向量"] / new_paper_cnt, 1),
+            "avg_score": sol_avg,
             "historical_avg": round(all_cat_totals["立体几何与空间向量"] / all_paper_cnt, 1),
-            "frequency": "年年必考 (1~2客观题 + 1解答题，新高考均分 18.2分)"
+            "frequency": f"年年必考 (1~2客观题 + 1解答题，新高考均分 {sol_avg}分)"
         },
         "概率与统计": {
-            "avg_score": round(new_cat_totals["概率与统计"] / new_paper_cnt, 1),
+            "avg_score": prob_avg,
             "historical_avg": round(all_cat_totals["概率与统计"] / all_paper_cnt, 1),
-            "frequency": "年年必考 (1客观题 + 1大题必考，新高考均分 16.2分)"
+            "frequency": f"年年必考 (1客观题 + 1大题必考，新高考均分 {prob_avg}分)"
         },
         "数列": {
-            "avg_score": round(new_cat_totals["数列"] / new_paper_cnt, 1),
+            "avg_score": seq_avg,
             "historical_avg": round(all_cat_totals["数列"] / all_paper_cnt, 1),
-            "frequency": "常考主干 (客观题或解答题，新高考均分 15.3分)"
+            "frequency": f"常考主干 (客观题或解答题，新高考均分 {seq_avg}分)"
         }
     }
 
@@ -460,7 +482,7 @@ def update_analysis_json(conn):
                 try:
                     for tag in json.loads(st_json):
                         subtag_cnt[tag] += 1
-                except:
+                except (json.JSONDecodeError, TypeError):
                     pass
         if not subtag_cnt:
             subtag_cnt[f"{cat}核心模型与综合应用"] = cat_total

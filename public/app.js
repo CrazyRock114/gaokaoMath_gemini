@@ -1862,26 +1862,31 @@ function renderPaperCards(papers) {
       trackBadge = '<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-semibold text-[11px]">统考</span>';
     }
 
+    const pName = p.paper_name || '';
+    const pType = p.paper_type || '';
+    const isMemoir = pName.includes('回忆版') || pType.includes('回忆版');
+    const isNewCurriculum = pName.includes('全国新课程卷');
+
     html += `
       <div class="bg-white rounded-2xl border border-slate-200/90 hover:border-blue-400 hover:shadow-md transition-all p-5 flex flex-col justify-between space-y-3 group">
         <div class="space-y-2">
           <div class="flex items-center justify-between text-xs">
             <div class="flex items-center space-x-1.5">
               <span class="font-mono font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded">${p.year}年</span>
-              <span class="font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">${p.province}</span>
+              <span class="font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">${p.province || ''}</span>
               ${trackBadge}
             </div>
             <span class="text-slate-400 text-[11px] font-mono">共 ${p.total_questions} 题 · 满分 ${p.total_score || 150}分</span>
           </div>
 
-          <h3 class="font-black text-slate-900 text-base group-hover:text-blue-600 transition-colors line-clamp-1 flex items-center gap-1.5">
-            <span>${p.paper_name}</span>
-            ${(p.paper_name.includes('回忆版') || (p.paper_type && p.paper_type.includes('回忆版'))) ? '<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-amber-300 flex-shrink-0">回忆版</span>' : ''}
-            ${p.paper_name.includes('全国新课程卷') ? '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-blue-300 flex-shrink-0">七省共用</span>' : ''}
+          <h3 class="font-black text-slate-900 text-base group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
+            <span class="line-clamp-1 min-w-0">${pName}</span>
+            ${isMemoir ? '<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-amber-300 flex-shrink-0">回忆版</span>' : ''}
+            ${isNewCurriculum ? '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-blue-300 flex-shrink-0">七省共用</span>' : ''}
           </h3>
 
           <p class="text-xs text-slate-500 line-clamp-1">
-            ${p.paper_type} · ${(p.paper_name.includes('回忆版') || (p.paper_type && p.paper_type.includes('回忆版'))) ? '民间考场回忆版审校' : '75年权威真题文献'}
+            ${pType} · ${isMemoir ? '民间考场回忆版审校' : '75年权威真题文献'}
           </p>
         </div>
 
@@ -1916,10 +1921,18 @@ async function openFullPaper(paper_id) {
     state.readerMode = 'teacher';
 
     let noteHtml = '';
-    if (data.paper.province && data.paper.province.includes('上海') && (data.paper.paper_name.includes('春') || (data.paper.paper_id && data.paper.paper_id.includes('spring')))) {
+    const pName = data.paper.paper_name || '';
+    const pProv = data.paper.province || '';
+    const pId = data.paper.paper_id || '';
+    const pTrack = data.paper.track || '';
+
+    if (pProv.includes('上海') && (pName.includes('春') || pId.includes('spring'))) {
       noteHtml = '<div class="mt-2 text-xs text-amber-200/90 bg-amber-950/60 border border-amber-500/40 rounded-lg px-3 py-1.5 font-sans">【编者注】本卷为上海春季高考民间教研回忆版真题（官方不对外公布标准试卷），试题与解析已按学界公认版本严格审校核定。</div>';
-    } else if (data.paper.year === 2003 && (data.paper.province.includes('天津') || (data.paper.paper_id && data.paper.paper_id.includes('tianjin')))) {
-      noteHtml = '<div class="mt-2 text-xs text-blue-200/90 bg-blue-950/60 border border-blue-500/40 rounded-lg px-3 py-1.5 font-sans">【编者注】2003年天津市高考数学实为教育部考试中心命制之全国新课程卷（津晋赣鲁皖黑青七省市共用）。第2题与第4题内容相同系当年试卷印刷真实排版缺陷，本站忠实保留历史原貌。</div>';
+    } else if (data.paper.year === 2003 && (pProv.includes('天津') || pId.includes('tianjin'))) {
+      const duplicateNote = (pTrack.includes('文') || pId.includes('liberal'))
+        ? '第2题与第4题内容相同系当年试卷印刷真实排版缺陷，本站忠实保留历史原貌。'
+        : '';
+      noteHtml = `<div class="mt-2 text-xs text-blue-200/90 bg-blue-950/60 border border-blue-500/40 rounded-lg px-3 py-1.5 font-sans">【编者注】2003年天津市高考数学实为教育部考试中心命制之全国新课程卷（津晋赣鲁皖黑青七省市共用）。${duplicateNote}</div>`;
     }
 
     document.getElementById('reader-paper-title').textContent = data.paper.paper_name;
@@ -2115,9 +2128,6 @@ async function addEntirePaperToBasket(paper_id) {
 function printReaderPaper() {
   document.body.classList.add('printing-modal');
   window.print();
-  setTimeout(() => {
-    document.body.classList.remove('printing-modal');
-  }, 1000);
 }
 
 window.addEventListener('afterprint', () => {
