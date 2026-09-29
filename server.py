@@ -78,8 +78,8 @@ class GaokaoMathHandler(SimpleHTTPRequestHandler):
             if route_val:
                 path = "/api/" + route_val.lstrip("/")
 
-        # API: /api/stats
-        if path == "/api/stats":
+        # API: /api/stats & /api/analysis
+        if path in ["/api/stats", "/api/analysis"]:
             self.handle_api_stats()
             return
 
@@ -98,8 +98,8 @@ class GaokaoMathHandler(SimpleHTTPRequestHandler):
             self.handle_api_papers(query)
             return
 
-        # API: /api/paper_detail
-        if path == "/api/paper_detail":
+        # API: /api/paper_detail & /api/paper
+        if path in ["/api/paper_detail", "/api/paper"]:
             self.handle_api_paper_detail(query)
             return
 
@@ -287,7 +287,7 @@ class GaokaoMathHandler(SimpleHTTPRequestHandler):
 
     def handle_api_paper_detail(self, query):
         try:
-            paper_id = query.get("paper_id", [""])[0]
+            paper_id = query.get("paper_id", [""])[0] or query.get("id", [""])[0]
             if not paper_id:
                 self.send_json({"error": "Missing paper_id"}, status=400)
                 return
@@ -361,8 +361,18 @@ class GaokaoMathHandler(SimpleHTTPRequestHandler):
 
     def handle_api_questions(self, query):
         try:
-            year_min = int(query.get("year_min", [1952])[0])
-            year_max = int(query.get("year_max", [2026])[0])
+            exact_year = query.get("year", [""])[0]
+            if exact_year and exact_year != "全部" and exact_year != "0":
+                try:
+                    y_val = int(exact_year)
+                    year_min = y_val
+                    year_max = y_val
+                except ValueError:
+                    year_min = int(query.get("year_min", [1952])[0])
+                    year_max = int(query.get("year_max", [2026])[0])
+            else:
+                year_min = int(query.get("year_min", [1952])[0])
+                year_max = int(query.get("year_max", [2026])[0])
             province = query.get("province", [""])[0]
             track = query.get("track", [""])[0]
             section = query.get("section", [""])[0]
