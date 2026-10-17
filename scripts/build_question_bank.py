@@ -322,9 +322,13 @@ def clean_latex(text):
         if path_m:
             fpath = path_m.group(1).strip()
             return f"\n\n<div class=\"flex justify-center my-3\"><img src=\"/{fpath}\" class=\"max-h-52 border border-slate-200 rounded p-1 bg-white\" alt=\"题图\" /></div>\n\n"
+        tex_m = re.search(r'img_repaint/([a-zA-Z0-9_\-\./]+)\.tex', full)
+        if tex_m:
+            fpath = f"img/{tex_m.group(1).strip()}.png"
+            return f"<div class=\"flex justify-center my-2\"><img src=\"/{fpath}\" class=\"max-h-44 border border-slate-200 rounded p-1 bg-white\" alt=\"选项图\" /></div>"
         return ""
 
-    text = re.sub(r"\\(?:bitmapfigure|solutionfigure|choicebitmap|bitmapinclude|includegraphics|sourcefigure)(?:\[[^\]]*\])?\{([^}]+)\}", replace_fig, text)
+    text = re.sub(r"\\(?:bitmapfigure|solutionfigure|choicebitmap|choicetexfigure|bitmapinclude|includegraphics|sourcefigure)(?:\[[^\]]*\])?\{([^}]+)\}", replace_fig, text)
     text = re.sub(r"\\texfigure(?:\[[^\]]*\])?\{([^}]+)\}", "", text)
     text = re.sub(r"\\FigureLayoutDeclare\{[^}]*\}\{[^}]*\}\{[^}]*\}", "", text)
     text = re.sub(r"\\FigureTrimDeclare\{[^}]*\}\{[^}]*\}", "", text)
@@ -400,25 +404,27 @@ def clean_latex(text):
     text = re.sub(r"（\s*\\quad\s*）", "（　　）", text)
 
     # 6. Handle lists: \begin{enumerate} and \begin{circlelist}
-    def replace_enum(m):
-        content = m.group(1)
-        items = re.split(r"\\item\s*", content)
-        res = []
-        q_idx = 1
-        for it in items:
-            it = it.strip()
-            if not it:
-                continue
-            if re.match(r"^\([0-9ivxIVX一二三四五]+\)", it) or re.match(r"^[0-9ivxIVX一二三四五]+[\.、]", it):
-                res.append(it)
-            else:
-                res.append(f"({q_idx}) {it}")
-                q_idx += 1
-        return "\n" + "\n".join(res) + "\n"
-
+    roman_markers = ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x"]
     for _ in range(5):
         if r"\begin{enumerate}" not in text:
             break
+        has_nested_enum = bool(re.search(r"\\begin\{enumerate\}(?:\[[^\]]*\])?(?:(?!\\end\{enumerate\}).)*?\\begin\{enumerate\}", text, flags=re.DOTALL))
+        def replace_enum(m, use_roman=has_nested_enum):
+            content = m.group(1)
+            items = re.split(r"\\item\s*", content)
+            res = []
+            q_idx = 1
+            for it in items:
+                it = it.strip()
+                if not it:
+                    continue
+                if re.match(r"^\([0-9ivxIVX一二三四五]+\)", it) or re.match(r"^[0-9ivxIVX一二三四五]+[\.、]", it):
+                    res.append(it)
+                else:
+                    marker = roman_markers[q_idx - 1] if (use_roman and q_idx <= len(roman_markers)) else str(q_idx)
+                    res.append(f"({marker}) {it}")
+                    q_idx += 1
+            return "\n" + "\n".join(res) + "\n"
         text = re.sub(r"\\begin\{enumerate\}(?:\[[^\]]*\])?((?:(?!\\begin\{enumerate\}).)*?)\\end\{enumerate\}", replace_enum, text, flags=re.DOTALL)
     text = re.sub(r"\\begin\{enumerate\}(?:\[[^\]]*\])?", "", text)
     text = re.sub(r"\\end\{enumerate\}", "", text)
@@ -526,7 +532,11 @@ def extract_choices(prob_text):
     
     pos = m.end()
     opts = []
-    for _ in range(4):
+    for _ in range(6):
+        while pos < len(prob_text) and prob_text[pos].isspace():
+            pos += 1
+        if pos >= len(prob_text) or prob_text[pos] != '{':
+            break
         opt, pos = parse_balanced_braces(prob_text, pos)
         if opt is not None:
             opts.append(clean_latex(opt.strip()))

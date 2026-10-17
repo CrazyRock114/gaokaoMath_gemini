@@ -243,12 +243,14 @@ def recalibrate_difficulties(conn):
 
         # 2. Multi Choice
         elif '多选' in sec:
-            if q_num <= 9:
-                return '基础' if not has_deep_concept else '中档'
-            elif q_num in [10, 11]:
-                return '中档'
-            else:
+            rel_idx = (q_num - (min_q or 9)) + 1
+            total_sec_multi = sec_cnt or 3
+            if rel_idx == total_sec_multi or q_num >= 12:
                 return '压轴'
+            elif rel_idx == 1 and not has_deep_concept:
+                return '基础'
+            else:
+                return '中档'
 
         # 3. Fill-in-the-blank
         elif '填空' in sec:
@@ -283,7 +285,7 @@ def recalibrate_difficulties(conn):
             if q_num <= 17:
                 return '基础' if (q_num <= 17 and body_len < 120 and '证明' not in body_text) else '中档'
             elif q_num in [18, 19]:
-                if tot_q <= 19 and q_num == 19:
+                if tot_q <= 19 and q_num in [18, 19]:
                     return '压轴'
                 return '中档'
             elif q_num in [20, 21]:

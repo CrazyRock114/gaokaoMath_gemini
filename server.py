@@ -562,41 +562,103 @@ class GaokaoMathHandler(SimpleHTTPRequestHandler):
                 rows = c.fetchall()
             elif preset == "new_gaokao_standard":
                 # 8 单选 + 3 多选 + 3 填空 + 5 解答 (Total 19 questions, 150 points)
-                # Pick high quality modern questions from 2020-2026
-                # 8 Single Choice: 4 basic, 3 medium, 1 hard
-                queries = [
-                    ("单选题", "基础", 4, None),
-                    ("单选题", "中档", 3, None),
-                    ("单选题", "压轴", 1, None),
-                    ("多选题", "中档", 2, None),
-                    ("多选题", "压轴", 1, None),
-                    ("填空题", "基础", 2, None),
-                    ("填空题", "压轴", 1, None),
-                    ("解答题", "中档", 1, "三角函数与解三角形"),
-                    ("解答题", "中档", 1, "立体几何与空间向量"),
-                    ("解答题", "中档", 1, "概率与统计"),
-                    ("解答题", "压轴", 1, "平面解析几何"),
-                    ("解答题", "压轴", 1, "函数与导数"),
-                ]
+                # Strict New Gaokao compliance:
+                # - Exact section match (never pull '选考题：解答题' or '附加题：解答题')
+                # - Balanced knowledge category distribution across all 6 core modules
+                import random
                 rows = []
-                for sec, diff, count, cat in queries:
-                    q = ["year >= 2020", "section LIKE ?", "difficulty = ?"]
-                    p = [f"%{sec}%", diff]
+                used_uids = set()
+                mcq_cat_counts = {}
+
+                def fetch_one(sec, diff, cat=None, exclude_cats=None):
+                    q_conds = ["year >= 2020", "section = ?", "difficulty = ?", "body NOT LIKE '%选修%'"]
+                    q_params = [sec, diff]
                     if cat:
-                        q.append("primary_category = ?")
-                        p.append(cat)
-                    where = " WHERE " + " AND ".join(q)
+                        q_conds.append("primary_category = ?")
+                        q_params.append(cat)
+                    if exclude_cats:
+                        placeholders = ",".join(["?"] * len(exclude_cats))
+                        q_conds.append(f"primary_category NOT IN ({placeholders})")
+                        q_params.extend(list(exclude_cats))
+                    if used_uids:
+                        placeholders = ",".join(["?"] * len(used_uids))
+                        q_conds.append(f"uid NOT IN ({placeholders})")
+                        q_params.extend(list(used_uids))
+                    where_sql = " WHERE " + " AND ".join(q_conds)
                     c.execute(f"""
                     SELECT uid, paper_id, year, province, paper_name, track, paper_type,
                            section, question_number, body, options_json, answer, solution,
                            images_json, has_image, primary_category, subtags_json,
                            methods_json, difficulty, score, adaptation_json
-                    FROM questions {where}
-                    ORDER BY RANDOM() LIMIT ?
-                    """, p + [count])
-                    rows.extend(c.fetchall())
+                    FROM questions {where_sql}
+                    ORDER BY RANDOM() LIMIT 1
+                    """, q_params)
+                    row = c.fetchone()
+                    if not row and exclude_cats:
+                        return fetch_one(sec, diff, cat=cat, exclude_cats=None)
+                    if row:
+                        used_uids.add(row["uid"])
+                    return row
+
+                # 1. 8 Single Choice (4 基础, 3 中档, 1 压轴) with category cap (max 2 per category, distinct for first 6)
+                for mandatory_cat in ["集合与常用逻辑用语", "平面向量与复数"]:
+                    r = fetch_one("单选题", "基础", cat=mandatory_cat)
+                    if r:
+                        rows.append(r)
+                        mcq_cat_counts[r["primary_category"]] = mcq_cat_counts.get(r["primary_category"], 0) + 1
+
+                while len(rows) < 4:
+                    saturated = [k for k, v in mcq_cat_counts.items() if v >= 1]
+                    r = fetch_one("单选题", "基础", exclude_cats=saturated)
+                    if not r:
+                        break
+                    rows.append(r)
+                    mcq_cat_counts[r["primary_category"]] = mcq_cat_counts.get(r["primary_category"], 0) + 1
+
+                for _ in range(3):
+                    saturated = [k for k, v in mcq_cat_counts.items() if v >= 1]
+                    r = fetch_one("单选题", "中档", exclude_cats=saturated)
+                    if r:
+                        rows.append(r)
+                        mcq_cat_counts[r["primary_category"]] = mcq_cat_counts.get(r["primary_category"], 0) + 1
+
+                saturated_hard = [k for k, v in mcq_cat_counts.items() if v >= 2]
+                r = fetch_one("单选题", "压轴", exclude_cats=saturated_hard)
+                if r:
+                    rows.append(r)
+                    mcq_cat_counts[r["primary_category"]] = mcq_cat_counts.get(r["primary_category"], 0) + 1
+
+                # 2. 3 Multiple Choice (2 中档, 1 压轴) from distinct categories
+                multi_cats = set()
+                for diff in ["中档", "中档", "压轴"]:
+                    r = fetch_one("多选题", diff, exclude_cats=multi_cats)
+                    if r:
+                        rows.append(r)
+                        multi_cats.add(r["primary_category"])
+
+                # 3. 3 Fill-in-the-blank (2 基础, 1 压轴) from distinct categories
+                fill_cats = set()
+                for diff in ["基础", "基础", "压轴"]:
+                    r = fetch_one("填空题", diff, exclude_cats=fill_cats)
+                    if r:
+                        rows.append(r)
+                        fill_cats.add(r["primary_category"])
+
+                # 4. 5 Subjective Big Questions (3 中档 + 2 压轴) covering 5 distinct core categories including 数列
+                med_pool = ["三角函数与解三角形", "数列", "立体几何与空间向量", "概率与统计"]
+                chosen_med_cats = random.sample(med_pool, 3)
+                for cat in chosen_med_cats:
+                    r = fetch_one("解答题", "中档", cat=cat)
+                    if r:
+                        rows.append(r)
+
+                hard_pool = ["平面解析几何", "函数与导数"]
+                for cat in hard_pool:
+                    r = fetch_one("解答题", "压轴", cat=cat)
+                    if r:
+                        rows.append(r)
             elif preset == "high_order_focus":
-                # 6 Advanced Big Questions (Calculus, Conics, Solid Geometry, Sequences, Probability)
+                # 6 Advanced Big Questions (Calculus, Conics, Solid Geometry, Sequences, Probability, Synthesis)
                 focus_cats = ["函数与导数", "平面解析几何", "立体几何与空间向量", "数列", "概率与统计", "综合题"]
                 rows = []
                 for cat in focus_cats:
@@ -606,7 +668,7 @@ class GaokaoMathHandler(SimpleHTTPRequestHandler):
                            images_json, has_image, primary_category, subtags_json,
                            methods_json, difficulty, score, adaptation_json
                     FROM questions
-                    WHERE year >= 2018 AND (section LIKE '%解答%' OR section LIKE '%综合%') AND primary_category = ?
+                    WHERE year >= 2018 AND section IN ('解答题', '综合题') AND body NOT LIKE '%选修%' AND primary_category = ?
                     ORDER BY RANDOM() LIMIT 1
                     """, (cat,))
                     r = c.fetchone()
